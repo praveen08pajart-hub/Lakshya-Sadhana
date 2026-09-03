@@ -1,0 +1,246 @@
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#f5f7fb;
+}
+
+.login-page{
+  min-height: 100vh;
+  display:flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-card{
+  width: 100%;
+  max-width: 400px;
+  background: white;
+  color: #666;
+  padding:32px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.00);
+}
+
+.login-card h1{
+margin-bottom: 8px;
+color: #222;
+}
+.login-card p{
+  color: #666;
+}
+.login-card form{
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 24px;
+}
+.login-card input{
+  padding: 12px;
+  border:1px solid #ddd;
+  font-size: 16px;
+}
+.login-card button{
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: #6c5ce7;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* dashboard css */-------
+.dashboard-page {
+  min-height: 100vh;
+  padding: 40px 60px;
+  background: #f5f7fb;
+}
+
+.dashboard-title {
+  margin-bottom: 30px;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+}
+
+.dashboard-card {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+}
+
+.dashboard-card h2,
+.dashboard-card h3 {
+  margin-top: 0;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-3px);
+}
+
+/* //quiz css */
+.quiz-page {
+  min-height: 100vh;
+  background: #f5f7fb;
+  padding: 40px 20px;
+}
+
+.quiz-container {
+  max-width: 750px;
+  margin: auto;
+}
+
+.question-card {
+  background: white;
+  padding: 24px;
+  margin-bottom: 20px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.quiz-option {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.quiz-option input {
+  margin-right: 10px;
+}
+
+.submit-quiz-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  background: #6c5ce7;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.result-card {
+  margin-top: 20px;
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* ..... */
+@media (max-width: 768px) {
+  .dashboard-page {
+    padding: 20px;
+  }
+
+  .dashboard-title {
+    font-size: 28px;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-card {
+    padding: 18px;
+  }
+
+  .quiz-page {
+    padding: 20px 12px;
+  }
+
+  .quiz-container {
+    width: 100%;
+  }
+
+  .question-card {
+    padding: 18px;
+  }
+
+  .login-card {
+    margin: 20px;
+    padding: 24px;
+  }
+}
+
+/* navbar css */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 40px;
+  background: white;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+}
+
+.navbar h2 {
+  margin: 0;
+  color: #6c5ce7;
+  cursor: pointer;
+}
+
+.navbar-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.navbar-actions button {
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: #6c5ce7;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.navbar-actions button:hover {
+  opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 14px 20px;
+  }
+
+  .navbar h2 {
+    font-size: 20px;
+  }
+
+  .navbar-actions {
+    gap: 8px;
+  }
+
+  .navbar-actions button {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+}
+
+/* back btn css */
+.back-btn {
+  border: none;
+  background: transparent;
+  color: #6c5ce7;
+  font-size: 15px;
+  cursor: pointer;
+  margin-bottom: 18px;
+  padding: 0;
+}
+
+.back-btn:hover {
+  text-decoration: underline;
+}
