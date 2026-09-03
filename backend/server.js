@@ -20,7 +20,7 @@ const Topic = require("./models/Topic");
 
 //express app
 const app = express();
-const port = 5000;
+const port = process.env.PORT || 5000;
 
 //global middleware
 app.use(express.json())
