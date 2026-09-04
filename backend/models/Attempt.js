@@ -10,6 +10,10 @@ const attemptSchema = new mongoose.Schema({
         ref: "Topic",
         reqquired: true
     },
+    submissionId: {
+        type: String,
+        required: true
+    },
     score: {
         type: Number,
         required: true

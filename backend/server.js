@@ -29,8 +29,6 @@ app.use(cors({
     origin: process.env.FRONTEND_URL
 }))
 
-// Temporary check
-console.log("Frontend URL:", process.env.FRONTEND_URL);
 
 // 7. CONNECT TO MONGODB
 mongoose.connect(process.env.MONGO_URI)
@@ -181,12 +179,26 @@ app.get("/api/profile", auth, (req, res) => {
 
 app.post("/api/quiz/submit", auth, async (req, res) => {
     try {
-        const { topicId, answers } = req.body;
+        const { topicId, answers, submissionId } = req.body;
         if (!topicId || !answers) {
             return res.status(400).json({
                 message: "topicID and answers are required"
             })
         }
+
+        // 2. Check duplicate submission
+        const existingAttempt = await Attempt.findOne({
+            user: req.user.id,
+            submissionId: submissionId
+        });
+
+        if (existingAttempt) {
+            return res.status(409).json({
+                message: "Quiz already submitted"
+            });
+        }
+
+        //get question
         const questions = await Question.find({
             topic: topicId
         });
@@ -215,6 +227,7 @@ app.post("/api/quiz/submit", auth, async (req, res) => {
         const attempt = await Attempt.create({
             user: req.user.id,
             topic: topicId,
+            submissionId: submissionId,
             score: score,
             totalQuestions: totalQuestions,
             correctAnswers: correctAnswers
