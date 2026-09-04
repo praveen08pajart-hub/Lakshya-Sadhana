@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Login() {
+    const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState(""); //store input value
     const [password, setPassword] = useState("");
 
@@ -50,16 +51,30 @@ function Login() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                     />
+                    <div className="password-field">
+                        <input type={showPassword ? "text" : "password"}
+                            placeholder="enter password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                        <button
+                            type="button"
+                            className="password-eye"
+                            onClick={() =>
+                                setShowPassword(!showPassword)
+                            }>
+                            {showPassword ? (
+                                <i class="fa-solid fa-eye-slash"></i>
 
-                    <input type="password"
-                        placeholder="enter password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
+                            ) : (
+                                <i class="fa-solid fa-eye"></i>)}
+                        </button>
+                    </div>
 
                     <button type="submit">
                         Login
                     </button>
+
                 </form>
 
                 <p>
@@ -68,8 +83,8 @@ function Login() {
                         Register
                     </span>
                 </p>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }
 export default Login;

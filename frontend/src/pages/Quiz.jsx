@@ -5,7 +5,9 @@ import { useParams, useNavigate } from "react-router-dom";
 
 function Quiz() {
     const navigate = useNavigate();
+    const [submissionId] = useState(() => crypto.randomUUID());
     const [result, setResult] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const { topicId } = useParams();
     const [answers, setAnswers] = useState({})
     const [questions, setQuestions] = useState([]);
@@ -28,6 +30,8 @@ function Quiz() {
             alert("Please answer all questions before submitting.");
             return;
         }
+        if (isSubmitting) return;
+        setIsSubmitting(true);
 
         try {
             const token = localStorage.getItem("token");
@@ -41,18 +45,24 @@ function Quiz() {
                     },
                     body: JSON.stringify({
                         topicId: topicId,
-                        answers: answers
+                        answers: answers,
+                        submissionId: submissionId
                     })
                 }
             );
             const data = await response.json();
             if (response.ok) {
                 setResult(data);
+            } else {
                 console.log(data.message);
+                // retrysubmition is fail
+                setIsSubmitting(false);
             }
         } catch (error) {
             console.log("Quiz submit error:", error);
             alert("Unable to submit quiz.");
+            // allow retry if network fail
+            setIsSubmitting(false);
         }
 
     };
@@ -124,7 +134,8 @@ function Quiz() {
                             </div>
                         </div>
                     ))}
-                    <button className="submit-quiz-btn" onClick={handleSubmit}>Submit Quiz</button>
+                    <button className="submit-quiz-btn" onClick={handleSubmit} disabled={isSubmitting}>
+                        {isSubmitting ? "Submitted" : "Submit Quiz"}</button>
                     {result && (
                         <div className="result-card">
                             <h2>Quiz Result</h2>

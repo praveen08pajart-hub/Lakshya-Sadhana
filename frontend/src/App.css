@@ -36,6 +36,7 @@ color: #222;
 }
 .login-card input{
   padding: 12px;
+  border-radius: 10px;
   border:1px solid #ddd;
   font-size: 16px;
 }
@@ -243,4 +244,37 @@ color: #222;
 
 .back-btn:hover {
   text-decoration: underline;
+}
+
+/* diable btn for sunit quiz */
+.submit-quiz-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.password-field {
+    position: relative;
+    width: 100%;
+}
+
+.password-field input {
+    width: 100%;
+    padding-right: 45px;
+}
+
+.password-eye {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+
+    width: auto !important;
+    padding: 5px !important;
+
+    border: none;
+    background: transparent !important;
+    color: #555 !important;
+
+    cursor: pointer;
+    font-size: 18px;
 }
