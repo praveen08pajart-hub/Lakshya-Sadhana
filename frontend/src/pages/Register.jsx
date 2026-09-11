@@ -6,6 +6,7 @@ function Register() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
 
     const navigate = useNavigate();
     const handleSubmit = async (e) => {
@@ -58,14 +59,26 @@ function Register() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                     />
-
-                    <input
-                        type="password"
-                        placeholder="Create a password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-
+                    <div className="password-field">
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Create a password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                        <button
+                            type="button"
+                            className="password-eye"
+                            onClick={() => setShowPassword(!showPassword)}
+                            aria-label={showPassword ? "Hide password" : "Show password"}
+                        >
+                            {showPassword ? (
+                                <i className="fa-solid fa-eye-slash"></i>
+                            ) : (
+                                <i className="fa-solid fa-eye"></i>
+                            )}
+                        </button>
+                    </div>
                     <button type="submit">Register</button>
                 </form>
 
