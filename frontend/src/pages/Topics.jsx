@@ -28,7 +28,7 @@ function Topics() {
                 if (response.ok) {
                     setTopics(data);
                 } else {
-                    console.log(data.message);
+                    alert(data.message);
                 }
             } catch (error) {
                 console.log("Topic fetch error:", error);

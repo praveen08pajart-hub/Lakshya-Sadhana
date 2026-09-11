@@ -23,7 +23,7 @@ function Navbar() {
                 <button onClick={handleLogout}>
                     Logout
                 </button>
-            </div>
+            </div> 
         </nav>
     );
 }

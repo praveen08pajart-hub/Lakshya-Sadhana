@@ -16,10 +16,10 @@ function Dashboard() {
                 if (response.ok) {
                     setSubjects(data);
                 } else {
-                    console.log(data.message);
+                    alert(data.message);
                 }
             } catch (error) {
-                console.log("Register response:", data);
+                console.log("Subject fetch error:", error);
             }
         };
 
