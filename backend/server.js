@@ -180,9 +180,9 @@ app.get("/api/profile", auth, (req, res) => {
 app.post("/api/quiz/submit", auth, async (req, res) => {
     try {
         const { topicId, answers, submissionId } = req.body;
-        if (!topicId || !answers) {
+        if (!topicId || !answers || !submissionId) {
             return res.status(400).json({
-                message: "topicID and answers are required"
+                message: "topicid, answers and submittionid  are required"
             })
         }
 
