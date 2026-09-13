@@ -295,13 +295,17 @@ color: #222;
     display: flex;
     background: var(--page-bg);
 }
-
 .sidebar {
     width: 240px;
-    min-height: 100vh;
+    height: 100vh;
     background: var(--sidebar);
     color: white;
     padding: 24px 16px;
+
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    overflow-y: auto;
 }
 
 .sidebar-brand {
