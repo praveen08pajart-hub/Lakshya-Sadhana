@@ -222,7 +222,60 @@ function Dashboard() {
                     </div>
                 </div>
             </div>
+            <div className="dashboard-section">
+                <div className="section-header">
+                    <div>
+                        <h2>Recent Activity</h2>
+                        <p>Your latest quiz attempts</p>
+                    </div>
 
+                    <button
+                        className="view-all-btn"
+                        onClick={() => navigate("/progress")}
+                    >
+                        View All
+                    </button>
+                </div>
+
+                <div className="recent-activity-list">
+                    {attempts.length === 0 ? (
+                        <div className="empty-activity">
+                            <p>No quiz activity yet.</p>
+                        </div>
+                    ) : (
+                        attempts.slice(0, 3).map((attempt) => (
+                            <div
+                                className="activity-item"
+                                key={attempt._id}
+                            >
+                                <div className="activity-left">
+                                    <div className="activity-icon">
+                                        <i className="fa-solid fa-clipboard-check"></i>
+                                    </div>
+
+                                    <div>
+                                        <h3>{attempt.topic?.name || "Quiz"}</h3>
+
+                                        <p>
+                                            {attempt.correctAnswers} / {attempt.totalQuestions} correct
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="activity-right">
+                                    <strong>{attempt.score}%</strong>
+
+                                    <span>
+                                        {attempt.createdAt
+                                            ? new Date(attempt.createdAt).toLocaleDateString()
+                                            : ""}
+                                    </span>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
         </DashboardLayout>
 
     );
