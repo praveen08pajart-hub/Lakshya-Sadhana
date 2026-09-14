@@ -9,60 +9,75 @@ function Dashboard() {
     const [attempts, setAttempts] = useState([]);
     const [weakTopics, setWeakTopics] = useState([]);
 
+    // Protect dashboard route
     useEffect(() => {
-        const fetchSubjects = async () => {
-            try {
-                const response = await fetch(`${API_URL}/api/subjects`);
-                const data = await response.json();
+        const token = localStorage.getItem("token");
 
-                if (response.ok) {
-                    setSubjects(data);
-                } else {
-                    alert(data.message);
-                }
-            } catch (error) {
-                console.log("Subject fetch error:", error);
+        if (!token) {
+            navigate("/");
+        }
+    }, [navigate]);
+
+    const fetchSubjects = async () => {
+        try {
+            const response = await fetch(`${API_URL}/api/subjects`);
+            const data = await response.json();
+
+            if (response.ok) {
+                setSubjects(data);
+            } else {
+                alert(data.message);
             }
-        };
-        const fetchProgress = async () => {
-            try {
-                const token = localStorage.getItem("token");
+        } catch (error) {
+            console.log("Subject fetch error:", error);
+        }
+    };
+    const fetchProgress = async () => {
+        try {
+            const token = localStorage.getItem("token");
 
-                const response = await fetch(`${API_URL}/api/progress`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    setAttempts(data);
+            const response = await fetch(`${API_URL}/api/progress`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
                 }
-            } catch (error) {
-                console.log("Progress fetch error:", error);
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setAttempts(data);
             }
-        };
+        } catch (error) {
+            console.log("Progress fetch error:", error);
+        }
+    };
 
-        const fetchWeakTopics = async () => {
-            try {
-                const token = localStorage.getItem("token");
+    const fetchWeakTopics = async () => {
+        try {
+            const token = localStorage.getItem("token");
 
-                const response = await fetch(`${API_URL}/api/weak-topics`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    setWeakTopics(data);
+            const response = await fetch(`${API_URL}/api/weak-topics`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
                 }
-            } catch (error) {
-                console.log("Weak topics error:", error);
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setWeakTopics(data);
             }
-        };
+        } catch (error) {
+            console.log("Weak topics error:", error);
+        }
+    };
+    // Fetch dashboard data
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            return;
+        }
         fetchSubjects();
         fetchProgress();
         fetchWeakTopics();

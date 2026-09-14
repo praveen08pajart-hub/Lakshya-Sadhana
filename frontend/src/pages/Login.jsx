@@ -6,11 +6,14 @@ function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState(""); //store input value
     const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            setLoading(true);
+
             const response = await fetch(`${API_URL}/api/auth/login`, {
                 method: "POST",
                 headers: {
@@ -31,10 +34,11 @@ function Login() {
                 alert(data.message);
             }
 
-
-
         } catch (error) {
-            console.log("Login error:", error)
+            console.log("Login error:", error);
+            alert("Unable to connect to server. Please try again.");
+        } finally {
+            setLoading(false);
         }
     };
     return (
@@ -71,8 +75,8 @@ function Login() {
                         </button>
                     </div>
 
-                    <button type="submit">
-                        Login
+                    <button type="submit" disabled={loading}>
+                        {loading ? "Logging in..." : "Login"}
                     </button>
 
                 </form>

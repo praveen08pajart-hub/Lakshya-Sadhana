@@ -341,18 +341,53 @@ app.get("/api/progress", auth, async (req, res) => {
         });
     }
 });
-
-//for weak section
+// Weak Topics
 app.get("/api/weak-topics", auth, async (req, res) => {
     try {
-        const weakAttempts = await Attempt.find({
-            user: req.user.id,
-            score: { $lt: 60 }  //mongoose command less than 60 
+        // Get all attempts for this user, newest first
+        const attempts = await Attempt.find({
+            user: req.user.id
         })
             .populate("topic")
             .sort({ createdAt: -1 });
+        // tamparaily
+        // TEMP DEBUG
+        console.log("WEAK TOPICS API CALLED");
 
-        res.status(200).json(weakAttempts);
+        for (const attempt of attempts) {
+            console.log(
+                "TOPIC:",
+                attempt.topic?.name,
+                "ID:",
+                attempt.topic?._id?.toString(),
+                "SCORE:",
+                attempt.score
+            );
+        }
+        const latestAttempts = [];
+        const seenTopics = new Set();
+
+        // Keep only the latest attempt for each topic
+        for (const attempt of attempts) {
+            if (!attempt.topic) {
+                continue;
+            }
+
+            const topicId = attempt.topic._id.toString();
+
+            if (!seenTopics.has(topicId)) {
+                seenTopics.add(topicId);
+                latestAttempts.push(attempt);
+            }
+        }
+
+        // Show only topics whose latest score is below 60
+        const weakTopics = latestAttempts.filter(
+            (attempt) => attempt.score < 60
+        );
+
+        res.status(200).json(weakTopics);
+
     } catch (error) {
         res.status(500).json({
             message: error.message
@@ -361,9 +396,5 @@ app.get("/api/weak-topics", auth, async (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`server is running on port ${port}`)
-})
-
-
-//info about no:
-//200 ok, 201 created, 400 bad req,401 unauthorized, 404 not found and 500 for sever error
+    console.log(`Server is running on port ${port}`);
+});
