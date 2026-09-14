@@ -350,20 +350,7 @@ app.get("/api/weak-topics", auth, async (req, res) => {
         })
             .populate("topic")
             .sort({ createdAt: -1 });
-        // tamparaily
-        // TEMP DEBUG
-        console.log("WEAK TOPICS API CALLED");
 
-        for (const attempt of attempts) {
-            console.log(
-                "TOPIC:",
-                attempt.topic?.name,
-                "ID:",
-                attempt.topic?._id?.toString(),
-                "SCORE:",
-                attempt.score
-            );
-        }
         const latestAttempts = [];
         const seenTopics = new Set();
 
