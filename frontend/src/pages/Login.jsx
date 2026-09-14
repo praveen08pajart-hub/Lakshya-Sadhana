@@ -1,94 +1,158 @@
-const API_URL = import.meta.env.VITE_API_URL;
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function Login() {
+    const navigate = useNavigate();
+
     const [showPassword, setShowPassword] = useState(false);
-    const [email, setEmail] = useState(""); //store input value
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
-    const navigate = useNavigate();
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         try {
             setLoading(true);
+            setError("");
 
-            const response = await fetch(`${API_URL}/api/auth/login`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    email: email,
-                    password: password
-                })
-            });
+            const response = await fetch(
+                `${API_URL}/api/auth/login`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        email,
+                        password
+                    })
+                }
+            );
+
             const data = await response.json();
-            if (response.ok) {
-                localStorage.setItem("token", data.token);
-                localStorage.setItem("user", JSON.stringify(data.user));
 
-                navigate("/dashboard"); //login success
+            if (response.ok) {
+                localStorage.setItem(
+                    "token",
+                    data.token
+                );
+
+                localStorage.setItem(
+                    "user",
+                    JSON.stringify(data.user)
+                );
+
+                navigate("/dashboard");
             } else {
-                alert(data.message);
+                setError(
+                    data.message ||
+                    "Login failed. Please check your details."
+                );
             }
 
         } catch (error) {
             console.log("Login error:", error);
-            alert("Unable to connect to server. Please try again.");
+
+            setError(
+                "Unable to connect to server. Please try again."
+            );
+
         } finally {
             setLoading(false);
         }
     };
+
     return (
         <div className="login-page">
             <div className="login-card">
 
                 <h1>Welcome Back</h1>
-                <p>Login to continue your learning journey</p>
+
+                <p>
+                    Login to continue your learning journey
+                </p>
 
                 <form onSubmit={handleSubmit}>
 
-                    <input type="email"
-                        placeholder="enter your email"
+                    <input
+                        type="email"
+                        placeholder="Enter your email"
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        onChange={(e) =>
+                            setEmail(e.target.value)
+                        }
+                        required
                     />
+
                     <div className="password-field">
-                        <input type={showPassword ? "text" : "password"}
-                            placeholder="enter password"
+
+                        <input
+                            type={
+                                showPassword
+                                    ? "text"
+                                    : "password"
+                            }
+                            placeholder="Enter password"
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={(e) =>
+                                setPassword(e.target.value)
+                            }
+                            required
                         />
+
                         <button
                             type="button"
                             className="password-eye"
                             onClick={() =>
-                                setShowPassword(!showPassword)
-                            }>
+                                setShowPassword(
+                                    !showPassword
+                                )
+                            }
+                        >
                             {showPassword ? (
                                 <i className="fa-solid fa-eye-slash"></i>
-
                             ) : (
-                                <i className="fa-solid fa-eye"></i>)}
+                                <i className="fa-solid fa-eye"></i>
+                            )}
                         </button>
+
                     </div>
 
-                    <button type="submit" disabled={loading}>
-                        {loading ? "Logging in..." : "Login"}
+                    {error && (
+                        <p className="form-error">
+                            {error}
+                        </p>
+                    )}
+
+                    <button
+                        type="submit"
+                        disabled={loading}
+                    >
+                        {loading
+                            ? "Logging in..."
+                            : "Login"}
                     </button>
 
                 </form>
 
                 <p>
                     Don't have an account?{" "}
-                    <span onClick={() => navigate("/register")}>
+                    <span
+                        onClick={() =>
+                            navigate("/register")
+                        }
+                    >
                         Register
                     </span>
                 </p>
-            </div >
-        </div >
+
+            </div>
+        </div>
     );
 }
+
 export default Login;

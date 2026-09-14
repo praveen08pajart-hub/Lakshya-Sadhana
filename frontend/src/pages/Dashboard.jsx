@@ -1,111 +1,177 @@
-const API_URL = import.meta.env.VITE_API_URL;
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function Dashboard() {
     const navigate = useNavigate();
+
     const [subjects, setSubjects] = useState([]);
     const [attempts, setAttempts] = useState([]);
     const [weakTopics, setWeakTopics] = useState([]);
 
-    // Protect dashboard route
-    useEffect(() => {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            navigate("/");
-        }
-    }, [navigate]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
 
     const fetchSubjects = async () => {
-        try {
-            const response = await fetch(`${API_URL}/api/subjects`);
-            const data = await response.json();
+        const response = await fetch(
+            `${API_URL}/api/subjects`
+        );
 
-            if (response.ok) {
-                setSubjects(data);
-            } else {
-                alert(data.message);
-            }
-        } catch (error) {
-            console.log("Subject fetch error:", error);
+        const data = await response.json();
+
+        if (response.status === 401) {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            navigate("/");
+            return;
         }
-    };
-    const fetchProgress = async () => {
-        try {
-            const token = localStorage.getItem("token");
 
-            const response = await fetch(`${API_URL}/api/progress`, {
+        if (!response.ok) {
+            throw new Error(
+                data.message || "Unable to load subjects."
+            );
+        }
+
+        setSubjects(data);
+    };
+
+    const fetchProgress = async () => {
+        const token = localStorage.getItem("token");
+
+        const response = await fetch(
+            `${API_URL}/api/progress`,
+            {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                setAttempts(data);
             }
-        } catch (error) {
-            console.log("Progress fetch error:", error);
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                data.message || "Unable to load progress."
+            );
         }
+
+        setAttempts(data);
     };
 
     const fetchWeakTopics = async () => {
-        try {
-            const token = localStorage.getItem("token");
+        const token = localStorage.getItem("token");
 
-            const response = await fetch(`${API_URL}/api/weak-topics`, {
+        const response = await fetch(
+            `${API_URL}/api/weak-topics`,
+            {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                setWeakTopics(data);
             }
-        } catch (error) {
-            console.log("Weak topics error:", error);
-        }
-    };
-    // Fetch dashboard data
-    useEffect(() => {
-        const token = localStorage.getItem("token");
+        );
 
-        if (!token) {
-            return;
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                data.message || "Unable to load weak topics."
+            );
         }
-        fetchSubjects();
-        fetchProgress();
-        fetchWeakTopics();
+
+        setWeakTopics(data);
+    };
+
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            try {
+                setLoading(true);
+                setError("");
+
+                await Promise.all([
+                    fetchSubjects(),
+                    fetchProgress(),
+                    fetchWeakTopics()
+                ]);
+
+            } catch (error) {
+                console.log(
+                    "Dashboard fetch error:",
+                    error
+                );
+
+                setError(
+                    error.message ||
+                    "Unable to load dashboard data."
+                );
+
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDashboardData();
     }, []);
 
     const averageScore =
         attempts.length > 0
             ? Math.round(
-                attempts.reduce((sum, attempt) => sum + attempt.score, 0) /
-                attempts.length
+                attempts.reduce(
+                    (sum, attempt) =>
+                        sum + attempt.score,
+                    0
+                ) / attempts.length
             )
             : 0;
 
+    if (loading) {
+        return (
+            <DashboardLayout>
+                <p>Loading dashboard...</p>
+            </DashboardLayout>
+        );
+    }
+
+    if (error) {
+        return (
+            <DashboardLayout>
+                <div className="dashboard-card">
+                    <h3>Unable to load dashboard</h3>
+
+                    <p>{error}</p>
+
+                    <button onClick={fetchDashboardData}>
+                        Try Again
+                    </button>
+                </div>
+            </DashboardLayout>
+        );
+    }
     return (
         <DashboardLayout>
-            <h1 className="dashboard-title">Dashboard</h1>
+            <h1 className="dashboard-title">
+                Dashboard
+            </h1>
 
             <div className="welcome-card">
                 <div className="welcome-content">
-                    <p className="welcome-small">KEEP LEARNING</p>
-
-                    <h2>Build your skills, one quiz at a time.</h2>
-
-                    <p>
-                        Continue practicing your subjects and improve your weak topics.
+                    <p className="welcome-small">
+                        KEEP LEARNING
                     </p>
 
-                    <button onClick={() => navigate("/progress")}>
+                    <h2>
+                        Build your skills, one quiz at a time.
+                    </h2>
+
+                    <p>
+                        Continue practicing your subjects and
+                        improve your weak topics.
+                    </p>
+
+                    <button
+                        onClick={() => navigate("/progress")}
+                    >
                         View My Progress
                         <i className="fa-solid fa-arrow-right"></i>
                     </button>
@@ -117,6 +183,7 @@ function Dashboard() {
             </div>
 
             <div className="stats-grid">
+
                 <div className="stat-card">
                     <div className="stat-icon">
                         <i className="fa-solid fa-clipboard-question"></i>
@@ -160,38 +227,52 @@ function Dashboard() {
                         <h2>{subjects.length}</h2>
                     </div>
                 </div>
-            </div>
 
+            </div>
 
             <div className="dashboard-section">
                 <div className="section-header">
                     <div>
                         <h2>My Subjects</h2>
-                        <p>Select a subject to continue learning</p>
+                        <p>
+                            Select a subject to continue learning
+                        </p>
                     </div>
                 </div>
 
                 <div className="subject-grid">
-                    {subjects.map((subject) => (
-                        <div
-                            className="subject-card"
-                            key={subject._id}
-                            onClick={() =>
-                                navigate(`/subjects/${subject._id}/topics`)
-                            }
-                        >
-                            <div className="subject-icon">
-                                <i className="fa-solid fa-book"></i>
-                            </div>
 
-                            <div>
-                                <h3>{subject.name}</h3>
-                                <p>{subject.category}</p>
-                            </div>
-
-                            <i className="fa-solid fa-arrow-right subject-arrow"></i>
+                    {subjects.length === 0 ? (
+                        <div className="dashboard-card">
+                            <p>
+                                No subjects available.
+                            </p>
                         </div>
-                    ))}
+                    ) : (
+                        subjects.map((subject) => (
+                            <div
+                                className="subject-card"
+                                key={subject._id}
+                                onClick={() =>
+                                    navigate(
+                                        `/subjects/${subject._id}/topics`
+                                    )
+                                }
+                            >
+                                <div className="subject-icon">
+                                    <i className="fa-solid fa-book"></i>
+                                </div>
+
+                                <div>
+                                    <h3>{subject.name}</h3>
+                                    <p>{subject.category}</p>
+                                </div>
+
+                                <i className="fa-solid fa-arrow-right subject-arrow"></i>
+                            </div>
+                        ))
+                    )}
+
                 </div>
             </div>
 
@@ -199,14 +280,19 @@ function Dashboard() {
                 <div className="section-header">
                     <div>
                         <h2>Quick Actions</h2>
-                        <p>Access important learning tools</p>
+                        <p>
+                            Access important learning tools
+                        </p>
                     </div>
                 </div>
 
                 <div className="quick-actions-grid">
+
                     <div
                         className="quick-action-card"
-                        onClick={() => navigate("/progress")}
+                        onClick={() =>
+                            navigate("/progress")
+                        }
                     >
                         <div className="quick-action-icon">
                             <i className="fa-solid fa-chart-line"></i>
@@ -214,7 +300,10 @@ function Dashboard() {
 
                         <div>
                             <h3>View Progress</h3>
-                            <p>Check your quiz performance and scores</p>
+                            <p>
+                                Check your quiz performance
+                                and scores
+                            </p>
                         </div>
 
                         <i className="fa-solid fa-arrow-right quick-action-arrow"></i>
@@ -222,7 +311,9 @@ function Dashboard() {
 
                     <div
                         className="quick-action-card"
-                        onClick={() => navigate("/weak-topics")}
+                        onClick={() =>
+                            navigate("/weak-topics")
+                        }
                     >
                         <div className="quick-action-icon">
                             <i className="fa-solid fa-triangle-exclamation"></i>
@@ -230,69 +321,98 @@ function Dashboard() {
 
                         <div>
                             <h3>Weak Topics</h3>
-                            <p>Review topics that need more practice</p>
+                            <p>
+                                Review topics that need more
+                                practice
+                            </p>
                         </div>
 
                         <i className="fa-solid fa-arrow-right quick-action-arrow"></i>
                     </div>
+
                 </div>
             </div>
+
             <div className="dashboard-section">
+
                 <div className="section-header">
                     <div>
                         <h2>Recent Activity</h2>
-                        <p>Your latest quiz attempts</p>
+                        <p>
+                            Your latest quiz attempts
+                        </p>
                     </div>
 
                     <button
                         className="view-all-btn"
-                        onClick={() => navigate("/progress")}
+                        onClick={() =>
+                            navigate("/progress")
+                        }
                     >
                         View All
                     </button>
                 </div>
 
                 <div className="recent-activity-list">
+
                     {attempts.length === 0 ? (
                         <div className="empty-activity">
-                            <p>No quiz activity yet.</p>
+                            <p>
+                                No quiz activity yet.
+                            </p>
                         </div>
                     ) : (
-                        attempts.slice(0, 3).map((attempt) => (
-                            <div
-                                className="activity-item"
-                                key={attempt._id}
-                            >
-                                <div className="activity-left">
-                                    <div className="activity-icon">
-                                        <i className="fa-solid fa-clipboard-check"></i>
+                        attempts
+                            .slice(0, 3)
+                            .map((attempt) => (
+                                <div
+                                    className="activity-item"
+                                    key={attempt._id}
+                                >
+                                    <div className="activity-left">
+
+                                        <div className="activity-icon">
+                                            <i className="fa-solid fa-clipboard-check"></i>
+                                        </div>
+
+                                        <div>
+                                            <h3>
+                                                {attempt.topic?.name ||
+                                                    "Quiz"}
+                                            </h3>
+
+                                            <p>
+                                                {attempt.correctAnswers} /{" "}
+                                                {attempt.totalQuestions}{" "}
+                                                correct
+                                            </p>
+                                        </div>
+
                                     </div>
 
-                                    <div>
-                                        <h3>{attempt.topic?.name || "Quiz"}</h3>
+                                    <div className="activity-right">
 
-                                        <p>
-                                            {attempt.correctAnswers} / {attempt.totalQuestions} correct
-                                        </p>
+                                        <strong>
+                                            {attempt.score}%
+                                        </strong>
+
+                                        <span>
+                                            {attempt.createdAt
+                                                ? new Date(
+                                                    attempt.createdAt
+                                                ).toLocaleDateString()
+                                                : ""}
+                                        </span>
+
                                     </div>
                                 </div>
-
-                                <div className="activity-right">
-                                    <strong>{attempt.score}%</strong>
-
-                                    <span>
-                                        {attempt.createdAt
-                                            ? new Date(attempt.createdAt).toLocaleDateString()
-                                            : ""}
-                                    </span>
-                                </div>
-                            </div>
-                        ))
+                            ))
                     )}
+
                 </div>
             </div>
-        </DashboardLayout>
 
+        </DashboardLayout>
     );
 }
 

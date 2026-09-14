@@ -1,26 +1,30 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-function Topics() {
+function Profile() {
     const navigate = useNavigate();
-    const { subjectId } = useParams();
 
-    const [topics, setTopics] = useState([]);
+    const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    const fetchTopics = async () => {
+    const fetchProfile = async () => {
         try {
             setLoading(true);
             setError("");
 
             const token = localStorage.getItem("token");
 
+            if (!token) {
+                navigate("/");
+                return;
+            }
+
             const response = await fetch(
-                `${API_URL}/api/subjects/${subjectId}/topics`,
+                `${API_URL}/api/profile`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -38,15 +42,15 @@ function Topics() {
             }
 
             if (response.ok) {
-                setTopics(data);
+                setProfile(data);
             } else {
                 setError(
-                    data.message || "Unable to load topics."
+                    data.message || "Unable to load profile."
                 );
             }
 
         } catch (error) {
-            console.log("Topic fetch error:", error);
+            console.log("Profile fetch error:", error);
 
             setError(
                 "Unable to connect to the server."
@@ -57,13 +61,13 @@ function Topics() {
     };
 
     useEffect(() => {
-        fetchTopics();
-    }, [subjectId]);
+        fetchProfile();
+    }, []);
 
     if (loading) {
         return (
             <DashboardLayout>
-                <p>Loading topics...</p>
+                <p>Loading profile...</p>
             </DashboardLayout>
         );
     }
@@ -79,42 +83,28 @@ function Topics() {
             </button>
 
             <h1 className="dashboard-title">
-                Topics
+                Profile
             </h1>
 
             {error ? (
                 <div className="dashboard-card">
-                    <h3>Unable to load topics</h3>
+                    <h3>Unable to load profile</h3>
                     <p>{error}</p>
 
-                    <button onClick={fetchTopics}>
+                    <button onClick={fetchProfile}>
                         Try Again
                     </button>
                 </div>
-            ) : topics.length === 0 ? (
+            ) : (
                 <div className="dashboard-card">
-                    <h3>No topics available</h3>
+                    <h2>
+                        {profile?.name || "User"}
+                    </h2>
 
                     <p>
-                        Topics have not been added for this subject yet.
+                        <strong>Email:</strong>{" "}
+                        {profile?.email || "Not available"}
                     </p>
-                </div>
-            ) : (
-                <div className="dashboard-grid">
-
-                    {topics.map((topic) => (
-                        <div
-                            className="dashboard-card"
-                            key={topic._id}
-                            onClick={() =>
-                                navigate(`/quiz/${topic._id}`)
-                            }
-                        >
-                            <h3>{topic.name}</h3>
-                            <p>Start quiz</p>
-                        </div>
-                    ))}
-
                 </div>
             )}
 
@@ -122,4 +112,4 @@ function Topics() {
     );
 }
 
-export default Topics;
+export default Profile;

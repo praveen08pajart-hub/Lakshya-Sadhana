@@ -53,6 +53,13 @@ function Quiz() {
 
                 const data = await response.json();
 
+                if (response.status === 401) {
+                    localStorage.removeItem("token");
+                    localStorage.removeItem("user");
+                    navigate("/");
+                    return;
+                }
+
                 if (response.ok) {
                     setQuestions(data);
                 } else {

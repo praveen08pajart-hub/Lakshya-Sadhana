@@ -9,47 +9,63 @@ function WeakTopics() {
 
     const [weakTopics, setWeakTopics] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    const fetchWeakTopics = async () => {
+        try {
+            setLoading(true);
+            setError("");
+
+            const token = localStorage.getItem("token");
+
+            if (!token) {
+                navigate("/");
+                return;
+            }
+
+            const response = await fetch(
+                `${API_URL}/api/weak-topics`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            const data = await response.json();
+
+            if (response.status === 401) {
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+                navigate("/");
+                return;
+            }
+
+            if (response.ok) {
+                setWeakTopics(data);
+            } else {
+                setError(
+                    data.message || "Unable to load weak topics."
+                );
+            }
+
+        } catch (error) {
+            console.log(
+                "Weak topics fetch error:",
+                error
+            );
+
+            setError(
+                "Unable to connect to the server."
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchWeakTopics = async () => {
-            try {
-                const token = localStorage.getItem("token");
-
-                // Protect page
-                if (!token) {
-                    navigate("/");
-                    return;
-                }
-
-                const response = await fetch(
-                    `${API_URL}/api/weak-topics`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`
-                        }
-                    }
-                );
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    setWeakTopics(data);
-                } else {
-                    alert(data.message);
-                }
-
-            } catch (error) {
-                console.log(
-                    "Weak topics fetch error:",
-                    error
-                );
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchWeakTopics();
-    }, [navigate]);
+    }, []);
 
     if (loading) {
         return (
@@ -73,8 +89,16 @@ function WeakTopics() {
                 Weak Topics
             </h1>
 
-            {weakTopics.length === 0 ? (
+            {error ? (
+                <div className="dashboard-card">
+                    <h3>Unable to load weak topics</h3>
+                    <p>{error}</p>
 
+                    <button onClick={fetchWeakTopics}>
+                        Try Again
+                    </button>
+                </div>
+            ) : weakTopics.length === 0 ? (
                 <div className="dashboard-card">
                     <h3>No weak topics 🎉</h3>
 
@@ -83,13 +107,10 @@ function WeakTopics() {
                         the weak-topic threshold.
                     </p>
                 </div>
-
             ) : (
-
                 <div className="weak-topic-list">
 
                     {weakTopics.map((attempt) => (
-
                         <div
                             className="weak-topic-card"
                             key={attempt._id}
@@ -103,7 +124,8 @@ function WeakTopics() {
 
                                 <div>
                                     <h3>
-                                        {attempt.topic?.name || "Unknown Topic"}
+                                        {attempt.topic?.name ||
+                                            "Unknown Topic"}
                                     </h3>
 
                                     <p className="weak-topic-message">
@@ -122,7 +144,6 @@ function WeakTopics() {
                             <div className="weak-topic-actions">
 
                                 <div className="weak-topic-score">
-
                                     <span>
                                         {attempt.score}%
                                     </span>
@@ -130,7 +151,6 @@ function WeakTopics() {
                                     <small>
                                         Needs Revision
                                     </small>
-
                                 </div>
 
                                 <button

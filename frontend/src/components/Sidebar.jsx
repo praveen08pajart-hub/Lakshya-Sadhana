@@ -47,12 +47,18 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     <span>Weak Topics</span>
                 </button>
 
-                <button disabled>
+                <button
+                    className={location.pathname === "/quiz-history" ? "active" : ""}
+                    onClick={() => handleNavigate("/quiz-history")}
+                >
                     <i className="fa-solid fa-clock-rotate-left"></i>
                     <span>Quiz History</span>
                 </button>
 
-                <button disabled>
+                <button
+                    className={location.pathname === "/profile" ? "active" : ""}
+                    onClick={() => handleNavigate("/profile")}
+                >
                     <i className="fa-solid fa-user"></i>
                     <span>Profile</span>
                 </button>
