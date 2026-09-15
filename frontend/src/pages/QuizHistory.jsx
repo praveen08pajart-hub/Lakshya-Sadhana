@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
+import { handleUnauthorized } from "../utils/auth";
+import { getResponseData } from "../utils/api";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -9,6 +11,7 @@ function QuizHistory() {
 
     const [attempts, setAttempts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
 
     const getStatus = (score) => {
         if (score >= 80) {
@@ -20,50 +23,54 @@ function QuizHistory() {
         }
     };
 
-    useEffect(() => {
-        const fetchHistory = async () => {
-            try {
-                const token = localStorage.getItem("token");
+    const fetchHistory = async () => {
+        try {
+            setLoading(true);
+            setError("");
 
-                if (!token) {
-                    navigate("/");
-                    return;
-                }
+            const token = localStorage.getItem("token");
 
-                const response = await fetch(
-                    `${API_URL}/api/progress`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`
-                        }
-                    }
-                );
-
-                const data = await response.json();
-
-                if (response.status === 401) {
-                    localStorage.removeItem("token");
-                    localStorage.removeItem("user");
-                    navigate("/");
-                    return;
-                }
-
-                if (response.ok) {
-                    setAttempts(data);
-                } else {
-                    alert(data.message);
-                }
-
-            } catch (error) {
-                console.log("Quiz history error:", error);
-                alert("Unable to load quiz history.");
-            } finally {
-                setLoading(false);
+            if (!token) {
+                navigate("/");
+                return;
             }
-        };
 
+            const response = await fetch(
+                `${API_URL}/api/progress`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+            const data = await getResponseData(response);
+
+            if (handleUnauthorized(response, navigate)) {
+                return;
+            }
+
+            if (response.ok) {
+                setAttempts(data);
+            } else {
+                setError(
+                    data.message || "Unable to load quiz history."
+                );
+            }
+
+        } catch (error) {
+            console.log("Quiz history error:", error);
+
+            setError(
+                "Unable to connect to the server."
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchHistory();
-    }, [navigate]);
+    }, []);
 
     if (loading) {
         return (
@@ -87,9 +94,19 @@ function QuizHistory() {
                 Quiz History
             </h1>
 
-            {attempts.length === 0 ? (
+            {error ? (
+                <div className="dashboard-card">
+                    <h3>Unable to load quiz history</h3>
+                    <p>{error}</p>
+
+                    <button onClick={fetchHistory}>
+                        Try Again
+                    </button>
+                </div>
+            ) : attempts.length === 0 ? (
                 <div className="dashboard-card">
                     <h3>No quiz history yet</h3>
+
                     <p>
                         Complete a quiz to see your attempts here.
                     </p>
@@ -104,7 +121,8 @@ function QuizHistory() {
                         >
                             <div className="history-info">
                                 <h3>
-                                    {attempt.topic?.name || "Unknown Topic"}
+                                    {attempt.topic?.name ||
+                                        "Unknown Topic"}
                                 </h3>
 
                                 <p>
@@ -114,9 +132,11 @@ function QuizHistory() {
                                 </p>
 
                                 <p>
-                                    {new Date(
-                                        attempt.createdAt
-                                    ).toLocaleDateString()}
+                                    {attempt.createdAt
+                                        ? new Date(
+                                            attempt.createdAt
+                                        ).toLocaleDateString()
+                                        : "Date unavailable"}
                                 </p>
                             </div>
 
@@ -130,7 +150,6 @@ function QuizHistory() {
                                 </small>
                             </div>
                         </div>
-
                     ))}
 
                 </div>

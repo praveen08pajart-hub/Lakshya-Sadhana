@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import { handleUnauthorized } from "../utils/auth";
+import { getResponseData } from "../utils/api";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -51,12 +53,8 @@ function Quiz() {
                     }
                 );
 
-                const data = await response.json();
-
-                if (response.status === 401) {
-                    localStorage.removeItem("token");
-                    localStorage.removeItem("user");
-                    navigate("/");
+                const data = await getResponseData(response);
+                if (handleUnauthorized(response, navigate)) {
                     return;
                 }
 

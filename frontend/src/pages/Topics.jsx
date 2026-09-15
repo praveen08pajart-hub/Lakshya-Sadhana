@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
+import { handleUnauthorized } from "../utils/auth";
+import { getResponseData } from "../utils/api";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -28,12 +30,9 @@ function Topics() {
                 }
             );
 
-            const data = await response.json();
+            const data = await getResponseData(response);
 
-            if (response.status === 401) {
-                localStorage.removeItem("token");
-                localStorage.removeItem("user");
-                navigate("/");
+            if (handleUnauthorized(response, navigate)) {
                 return;
             }
 

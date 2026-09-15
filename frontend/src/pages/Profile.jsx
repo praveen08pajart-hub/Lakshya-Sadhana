@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
+import { handleUnauthorized } from "../utils/auth";
+import { getResponseData } from "../utils/api";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -31,13 +33,9 @@ function Profile() {
                     }
                 }
             );
+            const data = await getResponseData(response);
 
-            const data = await response.json();
-
-            if (response.status === 401) {
-                localStorage.removeItem("token");
-                localStorage.removeItem("user");
-                navigate("/");
+            if (handleUnauthorized(response, navigate)) {
                 return;
             }
 

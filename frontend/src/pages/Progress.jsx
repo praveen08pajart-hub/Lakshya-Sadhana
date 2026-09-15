@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
+import { handleUnauthorized } from "../utils/auth";
+import { getResponseData } from "../utils/api";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -27,15 +29,11 @@ function Progress() {
                 }
             );
 
-            const data = await response.json();
+            const data = await getResponseData(response);
 
-            if (response.status === 401) {
-                localStorage.removeItem("token");
-                localStorage.removeItem("user");
-                navigate("/");
+            if (handleUnauthorized(response, navigate)) {
                 return;
             }
-
             if (response.ok) {
                 setAttempts(data);
             } else {
@@ -173,10 +171,10 @@ function Progress() {
 
                                         <span
                                             className={`score-badge ${attempt.score >= 80
-                                                    ? "strong"
-                                                    : attempt.score >= 60
-                                                        ? "practice"
-                                                        : "revise"
+                                                ? "strong"
+                                                : attempt.score >= 60
+                                                    ? "practice"
+                                                    : "revise"
                                                 }`}
                                         >
                                             {attempt.score >= 80

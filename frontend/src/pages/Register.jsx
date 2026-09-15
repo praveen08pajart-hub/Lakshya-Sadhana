@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getResponseData } from "../utils/api";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -36,7 +37,7 @@ function Register() {
                 }
             );
 
-            const data = await response.json();
+            const data = await getResponseData(response);
 
             if (response.ok) {
                 navigate("/");

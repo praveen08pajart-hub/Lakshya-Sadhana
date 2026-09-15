@@ -181,13 +181,29 @@ app.post("/api/auth/login", async (req, res) => {
     }
 });
 
-app.get("/api/profile", auth, (req, res) => {
-    res.status(200).json({
-        message: "protected route accessed",
-        userId: req.user.id
-    });
-})
+app.get("/api/profile", auth, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select("-password");
 
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            });
+        }
+
+        res.status(200).json({
+            name: user.name,
+            email: user.email
+        });
+
+    } catch (error) {
+        console.log("Profile error:", error);
+
+        res.status(500).json({
+            message: "Unable to load profile"
+        });
+    }
+});
 app.post("/api/quiz/submit", auth, async (req, res) => {
     try {
         const { topicId, answers, submissionId } = req.body;
