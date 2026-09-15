@@ -36,7 +36,7 @@ function QuizHistory() {
             }
 
             const response = await fetch(
-                `${API_URL}/api/progress`,
+                `${API_URL}/api/quiz-history`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`

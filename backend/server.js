@@ -360,14 +360,51 @@ app.get("/api/progress", auth, async (req, res) => {
             user: req.user.id
         })
             .populate("topic")
-            .sort({ createdAt: -1 }); //nearest first
-        res.status(200).json(attempts);
+            .sort({ createdAt: -1 });
+
+        const latestAttempts = [];
+        const seenTopics = new Set();
+
+        for (const attempt of attempts) {
+            if (!attempt.topic) {
+                continue;
+            }
+
+            const topicId = attempt.topic._id.toString();
+
+            if (!seenTopics.has(topicId)) {
+                seenTopics.add(topicId);
+                latestAttempts.push(attempt);
+            }
+        }
+
+        res.status(200).json(latestAttempts);
+
     } catch (error) {
         res.status(500).json({
             message: error.message
         });
     }
 });
+
+// quiz history
+app.get("/api/quiz-history", auth, async (req, res) => {
+    try {
+        const attempts = await Attempt.find({
+            user: req.user.id
+        })
+            .populate("topic")
+            .sort({ createdAt: -1 });
+
+        res.status(200).json(attempts);
+
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
+        });
+    }
+});
+
 // Weak Topics
 app.get("/api/weak-topics", auth, async (req, res) => {
     try {
