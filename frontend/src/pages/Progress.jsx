@@ -104,15 +104,14 @@ function Progress() {
                     <div className="progress-summary">
 
                         <div>
-                            <p>Total Attempts</p>
+                            <p>Topics Attempted</p>
                             <h2>{attempts.length}</h2>
                         </div>
 
                         <div>
-                            <p>Average Score</p>
+                            <p>Current Average Score</p>
                             <h2>{averageScore}%</h2>
                         </div>
-
                     </div>
 
                     {attempts.length === 0 ? (

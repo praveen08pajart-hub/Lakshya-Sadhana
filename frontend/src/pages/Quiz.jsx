@@ -126,15 +126,16 @@ function Quiz() {
                 }
             );
 
-            const data = await response.json();
+            const data = await getResponseData(response);
+
+            if (handleUnauthorized(response, navigate)) {
+                return;
+            }
 
             if (response.ok) {
                 setResult(data);
             } else {
-                alert(data.message);
-
-                // Allow retry if submission failed
-                setIsSubmitting(false);
+                alert(data.message || "Unable to submit quiz.");
             }
 
         } catch (error) {
@@ -142,7 +143,7 @@ function Quiz() {
 
             alert("Unable to submit quiz.");
 
-            // Allow retry after network error
+        } finally {
             setIsSubmitting(false);
         }
     };

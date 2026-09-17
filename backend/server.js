@@ -267,10 +267,17 @@ app.post("/api/quiz/submit", auth, async (req, res) => {
             totalQuestions: totalQuestions,
             attemptId: attempt._id
         })
-
     } catch (error) {
+        if (error.code === 11000) {
+            return res.status(409).json({
+                message: "Quiz already submitted"
+            });
+        }
+
+        console.log("Quiz submit error:", error);
+
         res.status(500).json({
-            message: error.message
+            message: "Unable to submit quiz"
         });
     }
 })

@@ -8,7 +8,7 @@ const attemptSchema = new mongoose.Schema({
     topic: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Topic",
-        reqquired: true
+        required: true
     },
     submissionId: {
         type: String,
@@ -30,5 +30,10 @@ const attemptSchema = new mongoose.Schema({
     timestamps: true
 
 });
+
+attemptSchema.index(
+    { user: 1, submissionId: 1 },
+    { unique: true }
+);
 
 module.exports = mongoose.model("Attempt", attemptSchema)

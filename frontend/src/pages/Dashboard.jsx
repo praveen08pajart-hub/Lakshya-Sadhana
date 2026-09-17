@@ -40,7 +40,7 @@ function Dashboard() {
         const token = localStorage.getItem("token");
 
         const response = await fetch(
-            `${API_URL}/api/progress`,
+            `${API_URL}/api/quiz-history`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -48,7 +48,11 @@ function Dashboard() {
             }
         );
 
-        const data = await response.json();
+        const data = await getResponseData(response);
+
+        if (handleUnauthorized(response, navigate)) {
+            return;
+        }
 
         if (!response.ok) {
             throw new Error(
@@ -82,34 +86,34 @@ function Dashboard() {
         setWeakTopics(data);
     };
 
+    const fetchDashboardData = async () => {
+        try {
+            setLoading(true);
+            setError("");
+
+            await Promise.all([
+                fetchSubjects(),
+                fetchProgress(),
+                fetchWeakTopics()
+            ]);
+
+        } catch (error) {
+            console.log(
+                "Dashboard fetch error:",
+                error
+            );
+
+            setError(
+                error.message ||
+                "Unable to load dashboard data."
+            );
+
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchDashboardData = async () => {
-            try {
-                setLoading(true);
-                setError("");
-
-                await Promise.all([
-                    fetchSubjects(),
-                    fetchProgress(),
-                    fetchWeakTopics()
-                ]);
-
-            } catch (error) {
-                console.log(
-                    "Dashboard fetch error:",
-                    error
-                );
-
-                setError(
-                    error.message ||
-                    "Unable to load dashboard data."
-                );
-
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchDashboardData();
     }, []);
 
