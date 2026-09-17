@@ -105,6 +105,14 @@ function WeakTopics() {
                         Your latest quiz results are above
                         the weak-topic threshold.
                     </p>
+
+                    <button
+                        className="practice-again-btn"
+                        onClick={() => navigate("/dashboard")}
+                    >
+                        Continue Learning
+                        <i className="fa-solid fa-arrow-right"></i>
+                    </button>
                 </div>
             ) : (
                 <div className="weak-topic-list">
@@ -136,6 +144,12 @@ function WeakTopics() {
                                         Try reviewing the topic again
                                         before your next quiz.
                                     </p>
+                                    <p className="attempt-date">
+                                        <i className="fa-regular fa-calendar"></i>{" "}
+                                        {attempt.createdAt
+                                            ? new Date(attempt.createdAt).toLocaleString()
+                                            : "Date unavailable"}
+                                    </p>
                                 </div>
 
                             </div>
@@ -166,6 +180,12 @@ function WeakTopics() {
                                     <i className="fa-solid fa-arrow-right"></i>
                                 </button>
 
+                                <button
+                                    className="view-history-btn"
+                                    onClick={() => navigate("/quiz-history")}
+                                >
+                                    View Quiz History
+                                </button>
                             </div>
 
                         </div>
