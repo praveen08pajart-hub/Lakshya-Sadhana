@@ -72,6 +72,16 @@ function QuizHistory() {
         fetchHistory();
     }, []);
 
+    const averageScore =
+        attempts.length > 0
+            ? Math.round(
+                attempts.reduce(
+                    (sum, attempt) => sum + attempt.score,
+                    0
+                ) / attempts.length
+            )
+            : 0;
+
     if (loading) {
         return (
             <DashboardLayout>
@@ -112,47 +122,70 @@ function QuizHistory() {
                     </p>
                 </div>
             ) : (
-                <div className="history-list">
-
-                    {attempts.map((attempt) => (
-                        <div
-                            className="history-card"
-                            key={attempt._id}
-                        >
-                            <div className="history-info">
-                                <h3>
-                                    {attempt.topic?.name ||
-                                        "Unknown Topic"}
-                                </h3>
-
-                                <p>
-                                    Correct Answers:{" "}
-                                    {attempt.correctAnswers} /{" "}
-                                    {attempt.totalQuestions}
-                                </p>
-
-                                <p>
-                                    {attempt.createdAt
-                                        ? new Date(
-                                            attempt.createdAt
-                                        ).toLocaleDateString()
-                                        : "Date unavailable"}
-                                </p>
-                            </div>
-
-                            <div className="history-result">
-                                <span className="history-score">
-                                    {attempt.score}%
-                                </span>
-
-                                <small>
-                                    {getStatus(attempt.score)}
-                                </small>
-                            </div>
+                <>
+                    <div className="progress-summary">
+                        <div>
+                            <p>Total Attempts</p>
+                            <h2>{attempts.length}</h2>
                         </div>
-                    ))}
 
-                </div>
+                        <div>
+                            <p>Average Score</p>
+                            <h2>{averageScore}%</h2>
+                        </div>
+                    </div>
+                    <div className="history-list">
+
+                        {attempts.map((attempt) => (
+                            <div
+                                className="history-card"
+                                key={attempt._id}
+                            >
+                                <div className="history-info">
+                                    <h3>
+                                        {attempt.topic?.name ||
+                                            "Unknown Topic"}
+                                    </h3>
+
+                                    <p>
+                                        Correct Answers:{" "}
+                                        {attempt.correctAnswers} /{" "}
+                                        {attempt.totalQuestions}
+                                    </p>
+
+                                    <p>
+                                        {attempt.createdAt
+                                            ? new Date(
+                                                attempt.createdAt
+                                            ).toLocaleString()
+                                            : "Date unavailable"}
+                                    </p>
+                                </div>
+
+                                <div className="history-result">
+                                    <span className="history-score">
+                                        {attempt.score}%
+                                    </span>
+
+                                    <small>
+                                        {getStatus(attempt.score)}
+                                    </small>
+                                    <button
+                                        className="practice-again-btn"
+                                        disabled={!attempt.topic?._id}
+                                        onClick={() =>
+                                            navigate(`/quiz/${attempt.topic._id}`)
+                                        }
+                                    >
+                                        Practice Again
+                                        <i className="fa-solid fa-arrow-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+
+                    </div>
+                </>
             )}
 
         </DashboardLayout>
