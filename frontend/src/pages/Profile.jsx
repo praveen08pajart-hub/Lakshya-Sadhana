@@ -61,11 +61,24 @@ function Profile() {
     useEffect(() => {
         fetchProfile();
     }, []);
-
+    const userInitial =
+        profile?.name
+            ? profile.name.charAt(0).toUpperCase()
+            : "U";
     if (loading) {
         return (
             <DashboardLayout>
-                <p>Loading profile...</p>
+                <div className="dashboard-loading">
+
+                    <div className="loading-spinner"></div>
+
+                    <h3>Loading your profile</h3>
+
+                    <p>
+                        Getting your account information...
+                    </p>
+
+                </div>
             </DashboardLayout>
         );
     }
@@ -85,16 +98,32 @@ function Profile() {
             </h1>
 
             {error ? (
-                <div className="dashboard-card">
+                <div className="dashboard-error">
+
+                    <div className="dashboard-error-icon">
+                        <i className="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+
                     <h3>Unable to load profile</h3>
+
                     <p>{error}</p>
 
-                    <button onClick={fetchProfile}>
+                    <button
+                        className="dashboard-retry-btn"
+                        onClick={fetchProfile}
+                    >
+                        <i className="fa-solid fa-rotate-right"></i>
                         Try Again
                     </button>
+
                 </div>
             ) : (
-                <div className="dashboard-card">
+                <div className="dashboard-card profile-card">
+
+                    <div className="profile-avatar">
+                        {userInitial}
+                    </div>
+
                     <h2>
                         {profile?.name || "User"}
                     </h2>
@@ -103,6 +132,7 @@ function Profile() {
                         <strong>Email:</strong>{" "}
                         {profile?.email || "Not available"}
                     </p>
+
                 </div>
             )}
 

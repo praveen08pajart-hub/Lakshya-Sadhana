@@ -148,6 +148,15 @@ function Quiz() {
         }
     };
 
+    const answeredCount = Object.keys(answers).length;
+
+    const progressPercentage =
+        questions.length > 0
+            ? Math.round(
+                (answeredCount / questions.length) * 100
+            )
+            : 0;
+
     if (loading) {
         return (
             <>
@@ -177,7 +186,26 @@ function Quiz() {
                     </button>
 
                     <h1>Quiz</h1>
+                    {questions.length > 0 && (
+                        <div className="quiz-progress">
+                            <div className="quiz-progress-info">
+                                <span>Quiz Progress</span>
 
+                                <span>
+                                    {answeredCount} of {questions.length} answered
+                                </span>
+                            </div>
+
+                            <div className="quiz-progress-track">
+                                <div
+                                    className="quiz-progress-fill"
+                                    style={{
+                                        width: `${progressPercentage}%`
+                                    }}
+                                ></div>
+                            </div>
+                        </div>
+                    )}
                     {questions.length === 0 ? (
                         <div className="question-card">
                             <p>
@@ -198,7 +226,10 @@ function Quiz() {
 
                                     {question.options?.map((option) => (
                                         <label
-                                            className="quiz-option"
+                                            className={`quiz-option ${answers[question._id] === option
+                                                ? "selected"
+                                                : ""
+                                                }`}
                                             key={option}
                                         >
                                             <input
@@ -245,12 +276,11 @@ function Quiz() {
 
                     {result && (
                         <div className="result-card">
-
                             <h2>Quiz Result</h2>
 
-                            <p>
-                                Score: {result.score}%
-                            </p>
+                            <div className="result-score-circle">
+                                {result.score}%
+                            </div>
 
                             <p>
                                 Correct Answers:{" "}
@@ -258,9 +288,16 @@ function Quiz() {
                                 {result.totalQuestions}
                             </p>
 
-                            <p>
-                                Status: {getStatus(result.score)}
-                            </p>
+                            <div
+                                className={`result-status ${result.score >= 80
+                                        ? "strong"
+                                        : result.score >= 60
+                                            ? "practice"
+                                            : "revise"
+                                    }`}
+                            >
+                                {getStatus(result.score)}
+                            </div>
 
                             <button
                                 className="practice-again-btn"

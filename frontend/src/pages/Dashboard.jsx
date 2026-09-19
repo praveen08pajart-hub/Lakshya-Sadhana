@@ -75,7 +75,11 @@ function Dashboard() {
             }
         );
 
-        const data = await response.json();
+        const data = await getResponseData(response);
+
+        if (handleUnauthorized(response, navigate)) {
+            return;
+        }
 
         if (!response.ok) {
             throw new Error(
@@ -128,10 +132,33 @@ function Dashboard() {
             )
             : 0;
 
+    const latestAttempt =
+        attempts.length > 0
+            ? attempts[0]
+            : null;
+
+    const getLearningStatus = (score) => {
+        if (score >= 80) {
+            return "Strong Understanding";
+        } else if (score >= 60) {
+            return "Needs More Practice";
+        } else {
+            return "Needs Revision";
+        }
+    };
+
     if (loading) {
         return (
             <DashboardLayout>
-                <p>Loading dashboard...</p>
+                <div className="dashboard-loading">
+                    <div className="loading-spinner"></div>
+
+                    <h3>Loading your dashboard</h3>
+
+                    <p>
+                        Getting your latest learning progress...
+                    </p>
+                </div>
             </DashboardLayout>
         );
     }
@@ -139,26 +166,40 @@ function Dashboard() {
     if (error) {
         return (
             <DashboardLayout>
-                <div className="dashboard-card">
+                <div className="dashboard-error">
+
+                    <div className="dashboard-error-icon">
+                        <i className="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+
                     <h3>Unable to load dashboard</h3>
 
                     <p>{error}</p>
 
-                    <button onClick={fetchDashboardData}>
+                    <button
+                        onClick={fetchDashboardData}
+                        className="dashboard-retry-btn"
+                    >
+                        <i className="fa-solid fa-rotate-right"></i>
                         Try Again
                     </button>
+
                 </div>
             </DashboardLayout>
         );
     }
     return (
         <DashboardLayout>
+
             <h1 className="dashboard-title">
                 Dashboard
             </h1>
 
+            {/* Welcome Card */}
             <div className="welcome-card">
+
                 <div className="welcome-content">
+
                     <p className="welcome-small">
                         KEEP LEARNING
                     </p>
@@ -178,16 +219,21 @@ function Dashboard() {
                         View My Progress
                         <i className="fa-solid fa-arrow-right"></i>
                     </button>
+
                 </div>
 
                 <div className="welcome-icon">
                     <i className="fa-solid fa-graduation-cap"></i>
                 </div>
+
             </div>
 
+
+            {/* Statistics */}
             <div className="stats-grid">
 
                 <div className="stat-card">
+
                     <div className="stat-icon">
                         <i className="fa-solid fa-clipboard-question"></i>
                     </div>
@@ -196,20 +242,26 @@ function Dashboard() {
                         <p>Quizzes Attempted</p>
                         <h2>{attempts.length}</h2>
                     </div>
+
                 </div>
 
+
                 <div className="stat-card">
+
                     <div className="stat-icon">
                         <i className="fa-solid fa-chart-line"></i>
                     </div>
 
                     <div>
-                        <p>Average Score</p>
+                        <p>Overall Average</p>
                         <h2>{averageScore}%</h2>
                     </div>
+
                 </div>
 
+
                 <div className="stat-card">
+
                     <div className="stat-icon">
                         <i className="fa-solid fa-triangle-exclamation"></i>
                     </div>
@@ -218,9 +270,12 @@ function Dashboard() {
                         <p>Weak Topics</p>
                         <h2>{weakTopics.length}</h2>
                     </div>
+
                 </div>
 
+
                 <div className="stat-card">
+
                     <div className="stat-icon">
                         <i className="fa-solid fa-book-open"></i>
                     </div>
@@ -229,30 +284,167 @@ function Dashboard() {
                         <p>Subjects</p>
                         <h2>{subjects.length}</h2>
                     </div>
+
                 </div>
 
             </div>
 
-            <div className="dashboard-section">
+
+            {/* Continue Learning */}
+            {latestAttempt ? (
+                <div className="continue-learning-card">
+
+                    <div className="continue-learning-left">
+
+                        <div className="continue-learning-icon">
+                            <i className="fa-solid fa-play"></i>
+                        </div>
+
+                        <div>
+
+                            <p className="continue-label">
+                                CONTINUE LEARNING
+                            </p>
+
+                            <h2>
+                                {latestAttempt.topic?.name || "Latest Quiz"}
+                            </h2>
+
+                            <div className="continue-details">
+
+                                <span>
+                                    Last Score:{" "}
+                                    <strong>
+                                        {latestAttempt.score}%
+                                    </strong>
+                                </span>
+
+                                <span
+                                    className={`score-badge ${latestAttempt.score >= 80
+                                        ? "strong"
+                                        : latestAttempt.score >= 60
+                                            ? "practice"
+                                            : "revise"
+                                        }`}
+                                >
+                                    {getLearningStatus(
+                                        latestAttempt.score
+                                    )}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        className="continue-learning-btn"
+                        onClick={() => {
+
+                            if (
+                                latestAttempt.score < 80 &&
+                                latestAttempt.topic?._id
+                            ) {
+                                navigate(
+                                    `/quiz/${latestAttempt.topic._id}`
+                                );
+                            } else {
+                                document
+                                    .getElementById("subjects-section")
+                                    ?.scrollIntoView({
+                                        behavior: "smooth"
+                                    });
+                            }
+
+                        }}
+                    >
+                        {latestAttempt.score < 60
+                            ? "Revise Topic"
+                            : latestAttempt.score < 80
+                                ? "Practice Again"
+                                : "Choose Next Topic"}
+
+                        <i className="fa-solid fa-arrow-right"></i>
+                    </button>
+
+                </div>
+            ) : (
+                <div className="continue-learning-card">
+
+                    <div className="continue-learning-left">
+
+                        <div className="continue-learning-icon">
+                            <i className="fa-solid fa-book-open"></i>
+                        </div>
+
+                        <div>
+                            <p className="continue-label">
+                                START LEARNING
+                            </p>
+
+                            <h2>Take your first quiz</h2>
+
+                            <div className="continue-details">
+                                Choose a subject and topic to begin
+                                tracking your progress.
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <button
+                        className="continue-learning-btn"
+                        onClick={() =>
+                            document
+                                .getElementById("subjects-section")
+                                ?.scrollIntoView({
+                                    behavior: "smooth"
+                                })
+                        }
+                    >
+                        Choose Subject
+                        <i className="fa-solid fa-arrow-right"></i>
+                    </button>
+
+                </div>
+            )}
+
+
+            {/* My Subjects */}
+            <div
+                className="dashboard-section"
+                id="subjects-section"
+            >
+
                 <div className="section-header">
+
                     <div>
                         <h2>My Subjects</h2>
+
                         <p>
                             Select a subject to continue learning
                         </p>
                     </div>
+
                 </div>
+
 
                 <div className="subject-grid">
 
                     {subjects.length === 0 ? (
+
                         <div className="dashboard-card">
                             <p>
                                 No subjects available.
                             </p>
                         </div>
+
                     ) : (
+
                         subjects.map((subject) => (
+
                             <div
                                 className="subject-card"
                                 key={subject._id}
@@ -262,32 +454,49 @@ function Dashboard() {
                                     )
                                 }
                             >
+
                                 <div className="subject-icon">
                                     <i className="fa-solid fa-book"></i>
                                 </div>
 
                                 <div>
-                                    <h3>{subject.name}</h3>
-                                    <p>{subject.category}</p>
+                                    <h3>
+                                        {subject.name}
+                                    </h3>
+
+                                    <p>
+                                        {subject.category}
+                                    </p>
                                 </div>
 
                                 <i className="fa-solid fa-arrow-right subject-arrow"></i>
+
                             </div>
+
                         ))
+
                     )}
 
                 </div>
+
             </div>
 
+
+            {/* Quick Actions */}
             <div className="dashboard-section">
+
                 <div className="section-header">
+
                     <div>
                         <h2>Quick Actions</h2>
+
                         <p>
                             Access important learning tools
                         </p>
                     </div>
+
                 </div>
+
 
                 <div className="quick-actions-grid">
 
@@ -297,12 +506,14 @@ function Dashboard() {
                             navigate("/progress")
                         }
                     >
+
                         <div className="quick-action-icon">
                             <i className="fa-solid fa-chart-line"></i>
                         </div>
 
                         <div>
                             <h3>View Progress</h3>
+
                             <p>
                                 Check your quiz performance
                                 and scores
@@ -310,7 +521,9 @@ function Dashboard() {
                         </div>
 
                         <i className="fa-solid fa-arrow-right quick-action-arrow"></i>
+
                     </div>
+
 
                     <div
                         className="quick-action-card"
@@ -318,12 +531,14 @@ function Dashboard() {
                             navigate("/weak-topics")
                         }
                     >
+
                         <div className="quick-action-icon">
                             <i className="fa-solid fa-triangle-exclamation"></i>
                         </div>
 
                         <div>
                             <h3>Weak Topics</h3>
+
                             <p>
                                 Review topics that need more
                                 practice
@@ -331,47 +546,61 @@ function Dashboard() {
                         </div>
 
                         <i className="fa-solid fa-arrow-right quick-action-arrow"></i>
+
                     </div>
 
                 </div>
+
             </div>
 
+
+            {/* Recent Activity */}
             <div className="dashboard-section">
 
                 <div className="section-header">
+
                     <div>
                         <h2>Recent Activity</h2>
+
                         <p>
                             Your latest quiz attempts
                         </p>
                     </div>
 
+
                     <button
                         className="view-all-btn"
                         onClick={() =>
-                            navigate("/progress")
+                            navigate("/quiz-history")
                         }
                     >
                         View All
                     </button>
+
                 </div>
+
 
                 <div className="recent-activity-list">
 
                     {attempts.length === 0 ? (
+
                         <div className="empty-activity">
                             <p>
                                 No quiz activity yet.
                             </p>
                         </div>
+
                     ) : (
+
                         attempts
                             .slice(0, 3)
                             .map((attempt) => (
+
                                 <div
                                     className="activity-item"
                                     key={attempt._id}
                                 >
+
                                     <div className="activity-left">
 
                                         <div className="activity-icon">
@@ -379,9 +608,9 @@ function Dashboard() {
                                         </div>
 
                                         <div>
+
                                             <h3>
-                                                {attempt.topic?.name ||
-                                                    "Quiz"}
+                                                {attempt.topic?.name || "Quiz"}
                                             </h3>
 
                                             <p>
@@ -389,9 +618,11 @@ function Dashboard() {
                                                 {attempt.totalQuestions}{" "}
                                                 correct
                                             </p>
+
                                         </div>
 
                                     </div>
+
 
                                     <div className="activity-right">
 
@@ -399,20 +630,35 @@ function Dashboard() {
                                             {attempt.score}%
                                         </strong>
 
-                                        <span>
+                                        <span
+                                            className={`activity-status ${attempt.score >= 80
+                                                ? "strong"
+                                                : attempt.score >= 60
+                                                    ? "practice"
+                                                    : "revise"
+                                                }`}
+                                        >
+                                            {getLearningStatus(attempt.score)}
+                                        </span>
+
+                                        <span className="activity-date">
                                             {attempt.createdAt
                                                 ? new Date(
                                                     attempt.createdAt
-                                                ).toLocaleDateString()
+                                                ).toLocaleString()
                                                 : ""}
                                         </span>
 
                                     </div>
+
                                 </div>
+
                             ))
+
                     )}
 
                 </div>
+
             </div>
 
         </DashboardLayout>
