@@ -3,6 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { handleUnauthorized } from "../utils/auth";
 import { getResponseData } from "../utils/api";
+import LoadingState from "../components/LoadingState";
+import { getLearningStatus, getLearningStatusClass } from "../utils/learningStatus";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -21,15 +23,7 @@ function Quiz() {
         () => crypto.randomUUID()
     );
 
-    const getStatus = (score) => {
-        if (score >= 80) {
-            return "Strong Understanding";
-        } else if (score >= 60) {
-            return "Needs More Practice";
-        } else {
-            return "Needs Revision";
-        }
-    };
+
 
     // Fetch questions
     useEffect(() => {
@@ -164,7 +158,10 @@ function Quiz() {
 
                 <div className="quiz-page">
                     <div className="quiz-container">
-                        <p>Loading quiz...</p>
+                        <LoadingState
+                            title="Loading quiz"
+                            message="Getting your questions ready..."
+                        />
                     </div>
                 </div>
             </>
@@ -289,14 +286,11 @@ function Quiz() {
                             </p>
 
                             <div
-                                className={`result-status ${result.score >= 80
-                                        ? "strong"
-                                        : result.score >= 60
-                                            ? "practice"
-                                            : "revise"
-                                    }`}
+                                className={`result-status ${getLearningStatusClass(
+                                    result.score
+                                )}`}
                             >
-                                {getStatus(result.score)}
+                                {getLearningStatus(result.score)}
                             </div>
 
                             <button

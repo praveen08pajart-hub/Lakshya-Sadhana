@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
+import LoadingState from "../components/LoadingState";
+import ErrorState from "../components/ErrorState";
 import { handleUnauthorized } from "../utils/auth";
 import { getResponseData } from "../utils/api";
+import { getLearningStatusClass, getLearningStatusShort } from "../utils/learningStatus";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -130,11 +133,13 @@ function Progress() {
                 : "Date unavailable"
         })
     );
-
     if (loading) {
         return (
             <DashboardLayout>
-                <p>Loading progress...</p>
+                <LoadingState
+                    title="Loading your progress"
+                    message="Getting your latest performance..."
+                />
             </DashboardLayout>
         );
     }
@@ -156,21 +161,11 @@ function Progress() {
             </h1>
 
             {error ? (
-                <div className="dashboard-card">
-
-                    <h3>
-                        Unable to load progress
-                    </h3>
-
-                    <p>{error}</p>
-
-                    <button
-                        onClick={fetchProgress}
-                    >
-                        Try Again
-                    </button>
-
-                </div>
+                <ErrorState
+                    title="Unable to load progress"
+                    message={error}
+                    onRetry={fetchProgress}
+                />
             ) : (
                 <>
 
@@ -415,18 +410,11 @@ function Progress() {
                                             </span>
 
                                             <span
-                                                className={`score-badge ${attempt.score >= 80
-                                                    ? "strong"
-                                                    : attempt.score >= 60
-                                                        ? "practice"
-                                                        : "revise"
-                                                    }`}
+                                                className={`score-badge ${getLearningStatusClass(
+                                                    attempt.score
+                                                )}`}
                                             >
-                                                {attempt.score >= 80
-                                                    ? "Strong"
-                                                    : attempt.score >= 60
-                                                        ? "Practice"
-                                                        : "Revise"}
+                                                {getLearningStatusShort(attempt.score)}
                                             </span>
 
                                         </div>

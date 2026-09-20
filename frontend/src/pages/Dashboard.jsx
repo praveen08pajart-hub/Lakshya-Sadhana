@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { handleUnauthorized } from "../utils/auth";
 import { getResponseData } from "../utils/api";
+import LoadingState from "../components/LoadingState";
+import ErrorState from "../components/ErrorState";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -150,15 +152,10 @@ function Dashboard() {
     if (loading) {
         return (
             <DashboardLayout>
-                <div className="dashboard-loading">
-                    <div className="loading-spinner"></div>
-
-                    <h3>Loading your dashboard</h3>
-
-                    <p>
-                        Getting your latest learning progress...
-                    </p>
-                </div>
+                <LoadingState
+                    title="Loading your dashboard"
+                    message="Getting your latest learning progress..."
+                />
             </DashboardLayout>
         );
     }
@@ -166,25 +163,11 @@ function Dashboard() {
     if (error) {
         return (
             <DashboardLayout>
-                <div className="dashboard-error">
-
-                    <div className="dashboard-error-icon">
-                        <i className="fa-solid fa-triangle-exclamation"></i>
-                    </div>
-
-                    <h3>Unable to load dashboard</h3>
-
-                    <p>{error}</p>
-
-                    <button
-                        onClick={fetchDashboardData}
-                        className="dashboard-retry-btn"
-                    >
-                        <i className="fa-solid fa-rotate-right"></i>
-                        Try Again
-                    </button>
-
-                </div>
+                <ErrorState
+                    title="Unable to load dashboard"
+                    message={error}
+                    onRetry={fetchDashboardData}
+                />
             </DashboardLayout>
         );
     }

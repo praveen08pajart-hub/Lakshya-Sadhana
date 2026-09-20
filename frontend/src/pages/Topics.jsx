@@ -3,6 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { handleUnauthorized } from "../utils/auth";
 import { getResponseData } from "../utils/api";
+import LoadingState from "../components/LoadingState";
+import ErrorState from "../components/ErrorState";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -62,7 +64,10 @@ function Topics() {
     if (loading) {
         return (
             <DashboardLayout>
-                <p>Loading topics...</p>
+                <LoadingState
+                    title="Loading topics"
+                    message="Getting the topics for this subject..."
+                />
             </DashboardLayout>
         );
     }
@@ -82,14 +87,11 @@ function Topics() {
             </h1>
 
             {error ? (
-                <div className="dashboard-card">
-                    <h3>Unable to load topics</h3>
-                    <p>{error}</p>
-
-                    <button onClick={fetchTopics}>
-                        Try Again
-                    </button>
-                </div>
+                <ErrorState
+                    title="Unable to load topics"
+                    message={error}
+                    onRetry={fetchTopics}
+                />
             ) : topics.length === 0 ? (
                 <div className="dashboard-card">
                     <h3>No topics available</h3>

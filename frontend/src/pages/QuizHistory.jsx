@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { handleUnauthorized } from "../utils/auth";
 import { getResponseData } from "../utils/api";
+import LoadingState from "../components/LoadingState";
+import ErrorState from "../components/ErrorState";
+import { getLearningStatus } from "../utils/learningStatus";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -13,15 +16,6 @@ function QuizHistory() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    const getStatus = (score) => {
-        if (score >= 80) {
-            return "Strong Understanding";
-        } else if (score >= 60) {
-            return "Needs More Practice";
-        } else {
-            return "Needs Revision";
-        }
-    };
 
     const fetchHistory = async () => {
         try {
@@ -85,7 +79,10 @@ function QuizHistory() {
     if (loading) {
         return (
             <DashboardLayout>
-                <p>Loading quiz history...</p>
+                <LoadingState
+                    title="Loading quiz history"
+                    message="Getting your previous quiz attempts..."
+                />
             </DashboardLayout>
         );
     }
@@ -105,14 +102,11 @@ function QuizHistory() {
             </h1>
 
             {error ? (
-                <div className="dashboard-card">
-                    <h3>Unable to load quiz history</h3>
-                    <p>{error}</p>
-
-                    <button onClick={fetchHistory}>
-                        Try Again
-                    </button>
-                </div>
+                <ErrorState
+                    title="Unable to load quiz history"
+                    message={error}
+                    onRetry={fetchHistory}
+                />
             ) : attempts.length === 0 ? (
                 <div className="dashboard-card">
                     <h3>No quiz history yet</h3>
@@ -168,7 +162,7 @@ function QuizHistory() {
                                     </span>
 
                                     <small>
-                                        {getStatus(attempt.score)}
+                                        {getLearningStatus(attempt.score)}
                                     </small>
                                     <button
                                         className="practice-again-btn"

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { handleUnauthorized } from "../utils/auth";
 import { getResponseData } from "../utils/api";
+import LoadingState from "../components/LoadingState";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -68,17 +69,10 @@ function Profile() {
     if (loading) {
         return (
             <DashboardLayout>
-                <div className="dashboard-loading">
-
-                    <div className="loading-spinner"></div>
-
-                    <h3>Loading your profile</h3>
-
-                    <p>
-                        Getting your account information...
-                    </p>
-
-                </div>
+                <LoadingState
+                    title="Loading your profile"
+                    message="Getting your account information..."
+                />
             </DashboardLayout>
         );
     }
@@ -98,25 +92,11 @@ function Profile() {
             </h1>
 
             {error ? (
-                <div className="dashboard-error">
-
-                    <div className="dashboard-error-icon">
-                        <i className="fa-solid fa-triangle-exclamation"></i>
-                    </div>
-
-                    <h3>Unable to load profile</h3>
-
-                    <p>{error}</p>
-
-                    <button
-                        className="dashboard-retry-btn"
-                        onClick={fetchProfile}
-                    >
-                        <i className="fa-solid fa-rotate-right"></i>
-                        Try Again
-                    </button>
-
-                </div>
+                <ErrorState
+                    title="Unable to load profile"
+                    message={error}
+                    onRetry={fetchProfile}
+                />
             ) : (
                 <div className="dashboard-card profile-card">
 

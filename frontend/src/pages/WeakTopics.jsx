@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { handleUnauthorized } from "../utils/auth";
 import { getResponseData } from "../utils/api";
+import LoadingState from "../components/LoadingState";
+import ErrorState from "../components/ErrorState";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -69,7 +71,10 @@ function WeakTopics() {
     if (loading) {
         return (
             <DashboardLayout>
-                <p>Loading weak topics...</p>
+                <LoadingState
+                    title="Loading weak topics"
+                    message="Checking which topics need more practice..."
+                />
             </DashboardLayout>
         );
     }
@@ -89,14 +94,11 @@ function WeakTopics() {
             </h1>
 
             {error ? (
-                <div className="dashboard-card">
-                    <h3>Unable to load weak topics</h3>
-                    <p>{error}</p>
-
-                    <button onClick={fetchWeakTopics}>
-                        Try Again
-                    </button>
-                </div>
+                <ErrorState
+                    title="Unable to load weak topics"
+                    message={error}
+                    onRetry={fetchWeakTopics}
+                />
             ) : weakTopics.length === 0 ? (
                 <div className="dashboard-card">
                     <h3>No weak topics 🎉</h3>
