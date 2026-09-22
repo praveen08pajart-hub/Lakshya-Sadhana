@@ -19,8 +19,15 @@ function Dashboard() {
     const [error, setError] = useState("");
 
     const fetchSubjects = async () => {
+        const token = localStorage.getItem("token");
+
         const response = await fetch(
-            `${API_URL}/api/subjects`
+            `${API_URL}/api/subjects`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
         );
 
         const data = await getResponseData(response);

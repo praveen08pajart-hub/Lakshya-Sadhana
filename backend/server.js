@@ -50,17 +50,47 @@ mongoose.connect(process.env.MONGO_URI)
         console.log("MongoDB connection error:", error.message);
     });
 //bad req use 400 and good or valid req is 201
-app.post("/api/subjects", async (req, res) => {
+app.post("/api/subjects", auth, async (req, res) => {
     try {
+        const { name, category } = req.body;
+
+        if (!name || !category) {
+            return res.status(400).json({
+                message: "name and category are required"
+            });
+        }
+
+        if (
+            typeof name !== "string" ||
+            typeof category !== "string"
+        ) {
+            return res.status(400).json({
+                message: "Invalid subject data"
+            });
+        }
+
+        if (
+            name.trim() === "" ||
+            category.trim() === ""
+        ) {
+            return res.status(400).json({
+                message: "Subject fields cannot be empty"
+            });
+        }
+
         const newSubject = await Subject.create({
-            name: req.body.name,
-            category: req.body.category
+            name: name.trim(),
+            category: category.trim()
         });
+
         res.status(201).json(newSubject);
+
     } catch (error) {
+        console.log("Create subject error:", error);
+
         res.status(500).json({
-            message: error.message
-        })
+            message: "Unable to create subject"
+        });
     }
 });
 
@@ -71,7 +101,7 @@ app.get("/api/hello", (req, res) => {
     res.send("hello from Lakshya Sadhana");
 })
 
-app.get("/api/subjects", async (req, res) => {
+app.get("/api/subjects", auth, async (req, res) => {
     try {
         const subjects = await Subject.find();
         res.json(subjects);
@@ -82,17 +112,6 @@ app.get("/api/subjects", async (req, res) => {
     }
 })
 
-// mongodb connection
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => {
-        console.log("mongoDB is connected");
-    })
-    .catch((error) => {
-        console.log("mongoDB connection error:", error.message);
-    })
-
-
-
 app.post("/api/auth/register", async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -102,8 +121,31 @@ app.post("/api/auth/register", async (req, res) => {
                 message: "name, email and password are required"
             });
         }
-        const existingUser = await User.findOne({ email: email });
-        if (existingUser) {
+        if (
+            typeof name !== "string" ||
+            typeof email !== "string" ||
+            typeof password !== "string"
+        ) {
+            return res.status(400).json({
+                message: "Invalid registration data"
+            });
+        }
+
+        if (
+            name.trim() === "" ||
+            email.trim() === "" ||
+            password.trim() === ""
+        ) {
+            return res.status(400).json({
+                message: "Fields cannot be empty"
+            });
+        }
+
+        const cleanName = name.trim();
+        const cleanEmail = email.trim().toLowerCase();
+        const existingUser = await User.findOne({
+            email: cleanEmail
+        }); if (existingUser) {
             return res.status(400).json({
                 message: "User already exists"
             })
@@ -112,8 +154,8 @@ app.post("/api/auth/register", async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const newUser = await User.create({
-            name: name,
-            email: email,
+            name: cleanName,
+            email: cleanEmail,
             password: hashedPassword
         });
         res.status(201).json({
@@ -141,7 +183,28 @@ app.post("/api/auth/login", async (req, res) => {
                 message: "email and password are required"
             });
         }
-        const user = await User.findOne({ email: email });
+        if (
+            typeof email !== "string" ||
+            typeof password !== "string"
+        ) {
+            return res.status(400).json({
+                message: "Invalid login data"
+            });
+        }
+
+        if (
+            email.trim() === "" ||
+            password.trim() === ""
+        ) {
+            return res.status(400).json({
+                message: "Email and password cannot be empty"
+            });
+        }
+
+        const cleanEmail = email.trim().toLowerCase();
+        const user = await User.findOne({
+            email: cleanEmail
+        });
 
         if (!user) {
             return res.status(400).json({
@@ -209,10 +272,41 @@ app.post("/api/quiz/submit", auth, async (req, res) => {
         const { topicId, answers, submissionId } = req.body;
         if (!topicId || !answers || !submissionId) {
             return res.status(400).json({
-                message: "topicid, answers and submittionid  are required"
+                message: "topicId, answers and submissionId are required"
             })
         }
+        if (!mongoose.Types.ObjectId.isValid(topicId)) {
+            return res.status(400).json({
+                message: "Invalid topicId"
+            });
+        }
 
+        if (
+            typeof answers !== "object" ||
+            answers === null ||
+            Array.isArray(answers)
+        ) {
+            return res.status(400).json({
+                message: "Answers must be a valid object"
+            });
+        }
+        if (
+            typeof submissionId !== "string" ||
+            submissionId.trim() === ""
+        ) {
+            return res.status(400).json({
+                message: "Invalid submissionId"
+            });
+        }
+        const topicExists = await Topic.exists({
+            _id: topicId
+        });
+
+        if (!topicExists) {
+            return res.status(404).json({
+                message: "Topic not found"
+            });
+        }
         // 2. Check duplicate submission
         const existingAttempt = await Attempt.findOne({
             user: req.user.id,
@@ -240,7 +334,37 @@ app.post("/api/quiz/submit", auth, async (req, res) => {
             });
         }
 
+        const validQuestionIds = new Set(
+            questions.map((question) =>
+                question._id.toString()
+            )
+        );
+
+        const submittedQuestionIds = Object.keys(answers);
+
+        const hasInvalidQuestion = submittedQuestionIds.some(
+            (questionId) => !validQuestionIds.has(questionId)
+        );
+
+        if (hasInvalidQuestion) {
+            return res.status(400).json({
+                message: "Invalid question submitted"
+            });
+        }
+
         let correctAnswers = 0;
+        const hasInvalidAnswer = questions.some((question) => {
+            const userAnswer =
+                answers[question._id.toString()];
+
+            return !question.options.includes(userAnswer);
+        });
+
+        if (hasInvalidAnswer) {
+            return res.status(400).json({
+                message: "Invalid answer submitted"
+            });
+        }
         for (const question of questions) {
             const userAnswer = answers[question._id.toString()];
 
@@ -284,57 +408,170 @@ app.post("/api/quiz/submit", auth, async (req, res) => {
 
 app.post("/api/questions", auth, async (req, res) => {
     try {
-        const { questionText, options, correctAnswer, topic } = req.body;
-        if (!questionText || !options || !correctAnswer || !topic) {
-            return res.status(400).json({
-                message: "All question field are required"
-            });
-
-        }
-        const newQuestion = await Question.create({
+        const {
             questionText,
             options,
             correctAnswer,
             topic
+        } = req.body;
+
+        // Required fields
+        if (!questionText || !options || !correctAnswer || !topic) {
+            return res.status(400).json({
+                message: "All question fields are required"
+            });
+        }
+
+        // Validate question text
+        if (
+            typeof questionText !== "string" ||
+            questionText.trim() === ""
+        ) {
+            return res.status(400).json({
+                message: "Invalid question text"
+            });
+        }
+
+        // Validate options
+        if (
+            !Array.isArray(options) ||
+            options.length < 2 ||
+            options.some(
+                (option) =>
+                    typeof option !== "string" ||
+                    option.trim() === ""
+            )
+        ) {
+            return res.status(400).json({
+                message: "At least two valid answer options are required"
+            });
+        }
+
+        // Validate correct answer
+        if (
+            typeof correctAnswer !== "string" ||
+            correctAnswer.trim() === ""
+        ) {
+            return res.status(400).json({
+                message: "Invalid correct answer"
+            });
+        }
+
+        // Correct answer must exist in options
+        const cleanOptions = options.map((option) => option.trim());
+        const cleanCorrectAnswer = correctAnswer.trim();
+
+        if (!cleanOptions.includes(cleanCorrectAnswer)) {
+            return res.status(400).json({
+                message: "Correct answer must be one of the options"
+            });
+        }
+
+        // Validate topic ID format
+        if (!mongoose.Types.ObjectId.isValid(topic)) {
+            return res.status(400).json({
+                message: "Invalid topicId"
+            });
+        }
+
+        // Check topic exists
+        const topicExists = await Topic.exists({
+            _id: topic
         });
+
+        if (!topicExists) {
+            return res.status(404).json({
+                message: "Topic not found"
+            });
+        }
+
+        // Create question
+        const newQuestion = await Question.create({
+            questionText: questionText.trim(),
+            options: cleanOptions,
+            correctAnswer: cleanCorrectAnswer,
+            topic
+        });
+
         res.status(201).json({
             message: "Question created successfully",
             question: newQuestion
         });
 
     } catch (error) {
+        console.log("Create question error:", error);
+
         res.status(500).json({
-            message: error.message
+            message: "Unable to create question"
         });
     }
-
 });
 
-//
 app.get("/api/topics/:topicId/questions", auth, async (req, res) => {
     try {
+        const { topicId } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(topicId)) {
+            return res.status(400).json({
+                message: "Invalid topicId"
+            });
+        }
+
+        const topicExists = await Topic.exists({
+            _id: topicId
+        });
+
+        if (!topicExists) {
+            return res.status(404).json({
+                message: "Topic not found"
+            });
+        }
+
         const questions = await Question.find({
-            topic: req.params.topicId
+            topic: topicId
         }).select("-correctAnswer");
+
         res.status(200).json(questions);
+
     } catch (error) {
+        console.log("Questions fetch error:", error);
+
         res.status(500).json({
-            message: error.message
+            message: "Unable to load questions"
         });
     }
-})
-
+});
 app.get("/api/subjects/:subjectId/topics", auth, async (req, res) => {
     try {
+        const { subjectId } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(subjectId)) {
+            return res.status(400).json({
+                message: "Invalid subjectId"
+            });
+        }
+
+        const subjectExists = await Subject.exists({
+            _id: subjectId
+        });
+
+        if (!subjectExists) {
+            return res.status(404).json({
+                message: "Subject not found"
+            });
+        }
+
         const topics = await Topic.find({
-            subject: req.params.subjectId
+            subject: subjectId
         });
 
         res.status(200).json(topics);
 
     } catch (error) {
+        console.log("Topics fetch error:", error);
+
         res.status(500).json({
-            message: error.message
+            message: "Unable to load topics"
         });
     }
 });
@@ -347,8 +584,35 @@ app.post("/api/topics", auth, async (req, res) => {
                 message: "name and subject are required"
             });
         }
+        if (typeof name !== "string") {
+            return res.status(400).json({
+                message: "Invalid topic name"
+            });
+        }
+
+        if (name.trim() === "") {
+            return res.status(400).json({
+                message: "Topic name cannot be empty"
+            });
+        }
+        if (!mongoose.Types.ObjectId.isValid(subject)) {
+            return res.status(400).json({
+                message: "Invalid subjectId"
+            });
+        }
+
+        const subjectExists = await Subject.exists({
+            _id: subject
+        });
+
+        if (!subjectExists) {
+            return res.status(404).json({
+                message: "Subject not found"
+            });
+        }
         const newtopic = await Topic.create({
-            name, subject
+            name: name.trim(),
+            subject
         });
         res.status(201).json({
             message: "Topic created successfully",
