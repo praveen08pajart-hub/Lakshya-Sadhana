@@ -341,11 +341,7 @@ function Dashboard() {
                                     `/quiz/${latestAttempt.topic._id}`
                                 );
                             } else {
-                                document
-                                    .getElementById("subjects-section")
-                                    ?.scrollIntoView({
-                                        behavior: "smooth"
-                                    });
+                                navigate("/subjects");
                             }
 
                         }}
@@ -386,13 +382,7 @@ function Dashboard() {
 
                     <button
                         className="continue-learning-btn"
-                        onClick={() =>
-                            document
-                                .getElementById("subjects-section")
-                                ?.scrollIntoView({
-                                    behavior: "smooth"
-                                })
-                        }
+                        onClick={() => navigate("/subjects")}
                     >
                         Choose Subject
                         <i className="fa-solid fa-arrow-right"></i>
@@ -402,74 +392,7 @@ function Dashboard() {
             )}
 
 
-            {/* My Subjects */}
-            <div
-                className="dashboard-section"
-                id="subjects-section"
-            >
 
-                <div className="section-header">
-
-                    <div>
-                        <h2>My Subjects</h2>
-
-                        <p>
-                            Select a subject to continue learning
-                        </p>
-                    </div>
-
-                </div>
-
-
-                <div className="subject-grid">
-
-                    {subjects.length === 0 ? (
-
-                        <div className="dashboard-card">
-                            <p>
-                                No subjects available.
-                            </p>
-                        </div>
-
-                    ) : (
-
-                        subjects.map((subject) => (
-
-                            <div
-                                className="subject-card"
-                                key={subject._id}
-                                onClick={() =>
-                                    navigate(
-                                        `/subjects/${subject._id}/topics`
-                                    )
-                                }
-                            >
-
-                                <div className="subject-icon">
-                                    <i className="fa-solid fa-book"></i>
-                                </div>
-
-                                <div>
-                                    <h3>
-                                        {subject.name}
-                                    </h3>
-
-                                    <p>
-                                        {subject.category}
-                                    </p>
-                                </div>
-
-                                <i className="fa-solid fa-arrow-right subject-arrow"></i>
-
-                            </div>
-
-                        ))
-
-                    )}
-
-                </div>
-
-            </div>
 
 
             {/* Quick Actions */}
@@ -493,25 +416,23 @@ function Dashboard() {
                     <div
                         className="quick-action-card"
                         onClick={() =>
-                            navigate("/progress")
+                            navigate("/quiz-history")
                         }
                     >
-
                         <div className="quick-action-icon">
-                            <i className="fa-solid fa-chart-line"></i>
+                            <i className="fa-solid fa-clock-rotate-left"></i>
                         </div>
 
                         <div>
-                            <h3>View Progress</h3>
+                            <h3>Quiz History</h3>
 
                             <p>
-                                Check your quiz performance
-                                and scores
+                                View your previous quiz
+                                attempts and scores
                             </p>
                         </div>
 
                         <i className="fa-solid fa-arrow-right quick-action-arrow"></i>
-
                     </div>
 
 

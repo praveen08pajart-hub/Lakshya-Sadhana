@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { handleUnauthorized } from "../utils/auth";
 import { getResponseData } from "../utils/api";
@@ -8,15 +8,14 @@ import ErrorState from "../components/ErrorState";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-function Topics() {
+function Subjects() {
     const navigate = useNavigate();
-    const { subjectId } = useParams();
 
-    const [topics, setTopics] = useState([]);
+    const [subjects, setSubjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    const fetchTopics = async () => {
+    const fetchSubjects = async () => {
         try {
             setLoading(true);
             setError("");
@@ -24,7 +23,7 @@ function Topics() {
             const token = localStorage.getItem("token");
 
             const response = await fetch(
-                `${API_URL}/api/subjects/${subjectId}/topics`,
+                `${API_URL}/api/subjects`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -39,15 +38,15 @@ function Topics() {
             }
 
             if (response.ok) {
-                setTopics(data);
+                setSubjects(data);
             } else {
                 setError(
-                    data.message || "Unable to load topics."
+                    data.message || "Unable to load subjects."
                 );
             }
 
         } catch (error) {
-            console.log("Topic fetch error:", error);
+            console.log("Subject fetch error:", error);
 
             setError(
                 "Unable to connect to the server."
@@ -58,15 +57,15 @@ function Topics() {
     };
 
     useEffect(() => {
-        fetchTopics();
-    }, [subjectId]);
+        fetchSubjects();
+    }, []);
 
     if (loading) {
         return (
             <DashboardLayout>
                 <LoadingState
-                    title="Loading topics"
-                    message="Getting the topics for this subject..."
+                    title="Loading subjects"
+                    message="Getting your available subjects..."
                 />
             </DashboardLayout>
         );
@@ -77,42 +76,53 @@ function Topics() {
 
             <button
                 className="back-btn"
-                onClick={() => navigate("/subjects")}
+                onClick={() => navigate("/dashboard")}
             >
-                ← Back to Subjects
+                ← Back to Dashboard
             </button>
 
             <h1 className="dashboard-title">
-                Topics
+                Subjects
             </h1>
+
+            <p>
+                Select a subject to view its topics.
+            </p>
 
             {error ? (
                 <ErrorState
-                    title="Unable to load topics"
+                    title="Unable to load subjects"
                     message={error}
-                    onRetry={fetchTopics}
+                    onRetry={fetchSubjects}
                 />
-            ) : topics.length === 0 ? (
+            ) : subjects.length === 0 ? (
                 <div className="dashboard-card">
-                    <h3>No topics available</h3>
+                    <h3>No subjects available</h3>
 
                     <p>
-                        Topics have not been added for this subject yet.
+                        Subjects have not been added yet.
                     </p>
                 </div>
             ) : (
                 <div className="dashboard-grid">
 
-                    {topics.map((topic) => (
+                    {subjects.map((subject) => (
                         <div
                             className="dashboard-card"
-                            key={topic._id}
+                            key={subject._id}
                             onClick={() =>
-                                navigate(`/quiz/${topic._id}`)
+                                navigate(`/subjects/${subject._id}/topics`)
                             }
                         >
-                            <h3>{topic.name}</h3>
-                            <p>Start quiz</p>
+                            <h3>{subject.name}</h3>
+
+                            <p>
+                                {subject.category}
+                            </p>
+
+                            <p>
+                                View Topics →
+                            </p>
                         </div>
                     ))}
 
@@ -123,4 +133,4 @@ function Topics() {
     );
 }
 
-export default Topics;
+export default Subjects;

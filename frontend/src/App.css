@@ -1998,3 +1998,254 @@ quiz-option:hover {
 .profile-card p {
     color: #666;
 }
+
+
+/* ============================= */
+/* QUIZ RESULT PAGE */
+/* ============================= */
+
+.result-page {
+    width: 100%;
+    max-width: 850px;
+    margin: 0 auto;
+    padding: 30px 20px 50px;
+}
+
+.result-heading {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.result-heading h1 {
+    margin: 5px 0 8px;
+    font-size: 32px;
+    color: #1f2937;
+}
+
+.result-heading p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 15px;
+}
+
+.result-heading .result-eyebrow {
+    color: #7c3aed;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.result-card {
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 38px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 22px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+.result-card h2 {
+    margin: 12px 0 25px;
+    font-size: 24px;
+    color: #1f2937;
+}
+
+.result-trophy {
+    width: 55px;
+    height: 55px;
+    margin: 0 auto;
+    border-radius: 16px;
+    background: #f3e8ff;
+    color: #7c3aed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+}
+
+.result-score-circle {
+    width: 145px;
+    height: 145px;
+    margin: 0 auto 20px;
+    border: 9px solid #7c3aed;
+    border-radius: 50%;
+    background: #faf5ff;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.result-score-circle span {
+    font-size: 34px;
+    font-weight: 800;
+    color: #6d28d9;
+}
+
+.result-score-circle small {
+    margin-top: 2px;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.result-status {
+    display: inline-block;
+    padding: 9px 18px;
+    margin-bottom: 28px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* Existing learning status classes can still control status styling */
+
+.result-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 28px;
+}
+
+.result-detail-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    text-align: left;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+}
+
+.result-detail-item i {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+    background: #ede9fe;
+    color: #7c3aed;
+}
+
+.result-detail-item div {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.result-detail-item span {
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.result-detail-item strong {
+    color: #1f2937;
+    font-size: 17px;
+}
+
+.result-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.result-primary-btn,
+.result-secondary-btn,
+.result-back-btn {
+    border: none;
+    border-radius: 10px;
+    padding: 13px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    transition: 0.2s ease;
+}
+
+.result-primary-btn {
+    background: #7c3aed;
+    color: white;
+}
+
+.result-primary-btn:hover {
+    background: #6d28d9;
+    transform: translateY(-1px);
+}
+
+.result-secondary-btn {
+    background: #ede9fe;
+    color: #6d28d9;
+}
+
+.result-secondary-btn:hover {
+    background: #ddd6fe;
+}
+
+.result-back-btn {
+    margin: 14px auto 0;
+    background: transparent;
+    color: #6b7280;
+}
+
+.result-back-btn:hover {
+    color: #7c3aed;
+    background: #f9fafb;
+}
+
+.result-empty {
+    margin-top: 60px;
+}
+
+.result-empty p {
+    color: #6b7280;
+    margin-bottom: 24px;
+}
+
+.result-icon {
+    font-size: 36px;
+    color: #7c3aed;
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+    .result-page {
+        padding: 20px 12px 35px;
+    }
+
+    .result-heading h1 {
+        font-size: 27px;
+    }
+
+    .result-card {
+        padding: 28px 18px;
+        border-radius: 18px;
+    }
+
+    .result-score-circle {
+        width: 125px;
+        height: 125px;
+    }
+
+    .result-score-circle span {
+        font-size: 30px;
+    }
+
+    .result-details,
+    .result-actions {
+        grid-template-columns: 1fr;
+    }
+}

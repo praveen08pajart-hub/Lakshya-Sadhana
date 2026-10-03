@@ -1,16 +1,20 @@
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import Subjects from "./pages/TemSubjects";
 import Topics from "./pages/Topics";
 import Quiz from "./pages/Quiz";
+import Result from "./pages/TemResult";
 import Progress from "./pages/Progress";
 import WeakTopics from "./pages/WeakTopics";
 import QuizHistory from "./pages/QuizHistory";
 import Profile from "./pages/Profile";
-import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
+
+import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 
 function App() {
@@ -18,6 +22,7 @@ function App() {
     <BrowserRouter>
       <Routes>
 
+        {/* Login */}
         <Route
           path="/"
           element={
@@ -27,6 +32,7 @@ function App() {
           }
         />
 
+        {/* Register */}
         <Route
           path="/register"
           element={
@@ -36,7 +42,7 @@ function App() {
           }
         />
 
-        {/* Protected routes */}
+        {/* Dashboard */}
         <Route
           path="/dashboard"
           element={
@@ -46,6 +52,17 @@ function App() {
           }
         />
 
+        {/* Subjects */}
+        <Route
+          path="/subjects"
+          element={
+            <ProtectedRoute>
+              <Subjects />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Topics */}
         <Route
           path="/subjects/:subjectId/topics"
           element={
@@ -55,6 +72,7 @@ function App() {
           }
         />
 
+        {/* Quiz */}
         <Route
           path="/quiz/:topicId"
           element={
@@ -64,6 +82,17 @@ function App() {
           }
         />
 
+        {/* Result */}
+        <Route
+          path="/result"
+          element={
+            <ProtectedRoute>
+              <Result />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Progress */}
         <Route
           path="/progress"
           element={
@@ -73,6 +102,7 @@ function App() {
           }
         />
 
+        {/* Weak Topics */}
         <Route
           path="/weak-topics"
           element={
@@ -82,6 +112,7 @@ function App() {
           }
         />
 
+        {/* Quiz History */}
         <Route
           path="/quiz-history"
           element={
@@ -91,6 +122,7 @@ function App() {
           }
         />
 
+        {/* Profile */}
         <Route
           path="/profile"
           element={
@@ -99,9 +131,16 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="*" element={<NotFound />} />
+
+        {/* 404 */}
+        <Route
+          path="*"
+          element={<NotFound />}
+        />
+
       </Routes>
     </BrowserRouter>
   );
 }
+
 export default App;

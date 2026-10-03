@@ -32,6 +32,19 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
                 </button>
 
                 <button
+                    className={
+                        location.pathname === "/subjects" ||
+                            location.pathname.includes("/topics")
+                            ? "active"
+                            : ""
+                    }
+                    onClick={() => handleNavigate("/subjects")}
+                >
+                    <i className="fa-solid fa-book-open"></i>
+                    <span>Subjects</span>
+                </button>
+
+                <button
                     className={location.pathname === "/progress" ? "active" : ""}
                     onClick={() => handleNavigate("/progress")}
                 >

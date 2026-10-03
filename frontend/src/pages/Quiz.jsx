@@ -4,7 +4,6 @@ import Navbar from "../components/Navbar";
 import { handleUnauthorized } from "../utils/auth";
 import { getResponseData } from "../utils/api";
 import LoadingState from "../components/LoadingState";
-import { getLearningStatus, getLearningStatusClass } from "../utils/learningStatus";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -14,16 +13,12 @@ function Quiz() {
 
     const [questions, setQuestions] = useState([]);
     const [answers, setAnswers] = useState({});
-    const [result, setResult] = useState(null);
-
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [loading, setLoading] = useState(true);
 
     const [submissionId, setSubmissionId] = useState(
         () => crypto.randomUUID()
     );
-
-
 
     // Fetch questions
     useEffect(() => {
@@ -48,6 +43,7 @@ function Quiz() {
                 );
 
                 const data = await getResponseData(response);
+
                 if (handleUnauthorized(response, navigate)) {
                     return;
                 }
@@ -55,12 +51,16 @@ function Quiz() {
                 if (response.ok) {
                     setQuestions(data);
                 } else {
-                    alert(data.message);
+                    alert(
+                        data.message || "Unable to load questions."
+                    );
                 }
 
             } catch (error) {
                 console.log("Question fetch error:", error);
+
                 alert("Unable to load questions.");
+
             } finally {
                 setLoading(false);
             }
@@ -68,7 +68,6 @@ function Quiz() {
 
         // Reset quiz whenever topic changes
         setAnswers({});
-        setResult(null);
         setIsSubmitting(false);
         setSubmissionId(crypto.randomUUID());
 
@@ -88,7 +87,7 @@ function Quiz() {
             return;
         }
 
-        if (isSubmitting || result) {
+        if (isSubmitting) {
             return;
         }
 
@@ -127,9 +126,16 @@ function Quiz() {
             }
 
             if (response.ok) {
-                setResult(data);
+                navigate("/result", {
+                    state: {
+                        result: data,
+                        topicId: topicId
+                    }
+                });
             } else {
-                alert(data.message || "Unable to submit quiz.");
+                alert(
+                    data.message || "Unable to submit quiz."
+                );
             }
 
         } catch (error) {
@@ -183,13 +189,16 @@ function Quiz() {
                     </button>
 
                     <h1>Quiz</h1>
+
                     {questions.length > 0 && (
                         <div className="quiz-progress">
+
                             <div className="quiz-progress-info">
                                 <span>Quiz Progress</span>
 
                                 <span>
-                                    {answeredCount} of {questions.length} answered
+                                    {answeredCount} of{" "}
+                                    {questions.length} answered
                                 </span>
                             </div>
 
@@ -201,12 +210,15 @@ function Quiz() {
                                     }}
                                 ></div>
                             </div>
+
                         </div>
                     )}
+
                     {questions.length === 0 ? (
                         <div className="question-card">
                             <p>
-                                No questions are available for this topic yet.
+                                No questions are available for this
+                                topic yet.
                             </p>
                         </div>
                     ) : (
@@ -224,8 +236,8 @@ function Quiz() {
                                     {question.options?.map((option) => (
                                         <label
                                             className={`quiz-option ${answers[question._id] === option
-                                                ? "selected"
-                                                : ""
+                                                    ? "selected"
+                                                    : ""
                                                 }`}
                                             key={option}
                                         >
@@ -233,16 +245,19 @@ function Quiz() {
                                                 type="radio"
                                                 name={question._id}
                                                 value={option}
-                                                disabled={Boolean(result)}
+                                                disabled={isSubmitting}
                                                 checked={
                                                     answers[question._id] ===
                                                     option
                                                 }
                                                 onChange={() =>
-                                                    setAnswers((previous) => ({
-                                                        ...previous,
-                                                        [question._id]: option
-                                                    }))
+                                                    setAnswers(
+                                                        (previous) => ({
+                                                            ...previous,
+                                                            [question._id]:
+                                                                option
+                                                        })
+                                                    )
                                                 }
                                             />
 
@@ -261,49 +276,12 @@ function Quiz() {
                         <button
                             className="submit-quiz-btn"
                             onClick={handleSubmit}
-                            disabled={isSubmitting || Boolean(result)}
+                            disabled={isSubmitting}
                         >
-                            {result
-                                ? "Submitted"
-                                : isSubmitting
-                                    ? "Submitting..."
-                                    : "Submit Quiz"}
+                            {isSubmitting
+                                ? "Submitting..."
+                                : "Submit Quiz"}
                         </button>
-                    )}
-
-                    {result && (
-                        <div className="result-card">
-                            <h2>Quiz Result</h2>
-
-                            <div className="result-score-circle">
-                                {result.score}%
-                            </div>
-
-                            <p>
-                                Correct Answers:{" "}
-                                {result.correctAnswers} /{" "}
-                                {result.totalQuestions}
-                            </p>
-
-                            <div
-                                className={`result-status ${getLearningStatusClass(
-                                    result.score
-                                )}`}
-                            >
-                                {getLearningStatus(result.score)}
-                            </div>
-
-                            <button
-                                className="practice-again-btn"
-                                onClick={() =>
-                                    navigate("/weak-topics")
-                                }
-                            >
-                                Check Weak Topics
-                                <i className="fa-solid fa-arrow-right"></i>
-                            </button>
-
-                        </div>
                     )}
 
                 </div>
